@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="Hexo Theme Keep">
+    <meta name="author" content="Shen Huanglin">
+    
+    <title>
+        
+            Flink 中的 StreamGraph 是如何生成的？ |
+        
+        Go For It !
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/favicon.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#757485","title":"Go For It !","author":"Shen Huanglin","avatar":"/images/touxiang.jpg","favicon":"/images/favicon.png"},"menu":{"home":"/","archives":"/archives"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"Keep writing and Keep loving.","hitokoto":true},"social_contact":{"enable":false,"links":{"github":null,"weixin":null,"qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":true,"hide_header":true},"home":{"announcement":null,"category":true,"tag":false,"post_datetime":"created"},"post":{"author_badge":{"enable":false,"level_badge":false,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":false,"min2read":false},"datetime_format":"YYYY 年 MM 月 DD 日","copyright_info":false,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null}},"code_block":{"tools":{"enable":true,"style":"mac"},"highlight_theme":"default"},"toc":{"enable":true,"number":false,"expand_all":false,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":false,"site_uv":false,"site_pv":true,"page_pv":true}},"local_search":{"enable":false,"preload":false},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":true},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":false},"footer":{"since":2025,"word_count":false,"site_deploy":{"enable":false,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+            <a class="site-name border-box" href="/">
+               Go For It !
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        Flink 中的 StreamGraph 是如何生成的？
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/touxiang.jpg">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">Shen Huanglin</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2026 年 04 月 17 日</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date" style="display: none;" >
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Tue Apr 21 2026 16:24:16 GMT+0800">2026 年 04 月 21 日</span>
+                </span>
+            
+        
+
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Flink/">Flink</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+        
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <p>Flink 中有四种图，分别是 StreamGraph、JobGraph、ExecutionGraph 和 Physical Graph。</p>
+<div align=center><img    
+                       lazyload
+                       alt="image"
+                       data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260417172200253.png"
+                         style="zoom:120%;" 
+                 ></div>
+
+<p><strong>StreamGraph（逻辑流图）</strong>：根据用户<strong>通过 DataStream API 编写的代码生成的 DAG 图</strong>，<strong>用于表示程序的拓扑结构</strong>。</p>
+<p><strong>JobGraph（作业图）</strong>：将 StreamGraph 中<strong>符合条件的节点链接合并成一个任务节点</strong>，形成<strong>算子链</strong>，<strong>减少数据交换的开销</strong>。</p>
+<p><strong>ExecutionGraph（执行图）</strong>：JobMaster 按照并行度对 JobGraph 的<strong>并行子任务进行拆分</strong>，并明确任务间的数据传输方式，是<strong>调度层最核心的数据结构</strong>。</p>
+<p><strong>Physical Graph（物理图）</strong>：JobMaster 生成 ExecutionGraph 后，分发给 TaskManager 进行部署。物理图在执行图的基础上，确定了数据存放的位置和收发的具体方式，使 TaskManager 能够对收到的数据进行处理计算。</p>
+<blockquote>
+<p>注：物理图只是具体执行层面的图，不是实际的数据结构。</p>
+</blockquote>
+<h2 id="一、StreamExecutionEnvironment"><a href="#一、StreamExecutionEnvironment" class="headerlink" title="一、StreamExecutionEnvironment"></a>一、StreamExecutionEnvironment</h2><p><code>StreamExecutionEnvironment</code> 提供了一系列方法用于配置流处理程序的执行环境，其职责包括</p>
+<ol>
+<li>构建拓扑：当调用 <code>map</code>、<code>filter</code>、<code>window</code> 等时，<code>StreamExecutionEnvironment</code> 并不执行计算，而是在内部维护一个 <code>List&lt;Transformation&lt;?&gt;&gt; transformations</code>。</li>
+<li>管理配置：持有 <code>ExecutionConfig</code>（控制并行度、容错参数等）和 <code>CheckpointConfig</code>（控制检查点行为）。</li>
+<li>读取数据：从内存、文件或外部数据源（如 Kafka）读取数据，创建 <code>DataStream</code>。</li>
+<li>触发作业：通过调用 <code>execute</code> 方法，将本地构建的 StreamGraph 转换为 JobGraph，并提交给集群的 Dispatcher。</li>
+</ol>
+<p>类内的核心成员变量包括</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 控制作业运行时的具体配置，如重启策略、并行度等</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="type">ExecutionConfig</span> <span class="variable">config</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">ExecutionConfig</span>();</span><br><span class="line"><span class="comment">// 控制检查点相关的配置</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="type">CheckpointConfig</span> <span class="variable">checkpointCfg</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">CheckpointConfig</span>();</span><br><span class="line"><span class="comment">// 存储作业所有的转换逻辑</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">final</span> List&lt;Transformation&lt;?&gt;&gt; transformations = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line"><span class="comment">// 存储配置项</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">final</span> Configuration configuration;</span><br></pre></td></tr></table></figure>
+
+<p>在每个 Flink 程序的最开始，需要先获取执行环境，通常使用 <code>getExecutionEnvironment</code> 方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> StreamExecutionEnvironment <span class="title function_">getExecutionEnvironment</span><span class="params">(Configuration configuration)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> Utils.resolveFactory(threadLocalContextEnvironmentFactory, contextEnvironmentFactory)</span><br><span class="line">            .map(factory -&gt; factory.createExecutionEnvironment(configuration))</span><br><span class="line">            .orElseGet(() -&gt; StreamExecutionEnvironment.createLocalEnvironment(configuration));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>该方法优先通过工厂进行决策，根据 <code>resolveFactory</code> 方法的源代码可知，<code>threadLocalContextEnvironmentFactory</code> 具有第一优先级，其用于<strong>多线程</strong>并发环境，确保每个线程拥有独立的上下文，当通过命令行 <code>./bin/flink run</code> 提交 Jar 包时，Flink 的 <code>CliFrontend</code> 会预先在当前线程设置 <code>contextEnvironmentFactory</code>。当成功获取到工厂后，就根据配置创建执行环境。如果没有找到任何工厂，则判定当前程序是一个独立的本地程序，会创建一个 <code>LocalStreamEnvironment</code>，它会在当前的 JVM 内部启动一个 MiniCluster，其中包含一个临时的 JobManager 和 TaskManager，通过线程间通信模拟分布式运行。</p>
+<p>获取到执行环境后，就要构建 StreamGraph 的数据流入口，即 Source，在 Flink 1.18 版本中，官方推荐使用 <code>StreamExecutionEnvironment</code> 中的 <code>fromSource</code> 方法，该方法用于定义从哪个数据源读取以及使用的 Watermark 策略，然后返回一个 <code>DataStreamSource</code>，作为整个作业的流式拓扑结构的逻辑起点。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;OUT&gt; DataStreamSource&lt;OUT&gt; <span class="title function_">fromSource</span><span class="params">(</span></span><br><span class="line"><span class="params">        Source&lt;OUT, ?, ?&gt; source,</span></span><br><span class="line"><span class="params">        WatermarkStrategy&lt;OUT&gt; timestampsAndWatermarks,</span></span><br><span class="line"><span class="params">        String sourceName,</span></span><br><span class="line"><span class="params">        TypeInformation&lt;OUT&gt; typeInfo)</span> &#123;</span><br><span class="line">    <span class="comment">// 获取输出数据类型</span></span><br><span class="line">    <span class="keyword">final</span> TypeInformation&lt;OUT&gt; resolvedTypeInfo =</span><br><span class="line">            getTypeInfo(source, sourceName, Source.class, typeInfo);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">DataStreamSource</span>&lt;&gt;(</span><br><span class="line">            <span class="built_in">this</span>,</span><br><span class="line">            checkNotNull(source, <span class="string">&quot;source&quot;</span>),</span><br><span class="line">            checkNotNull(timestampsAndWatermarks, <span class="string">&quot;timestampsAndWatermarks&quot;</span>),</span><br><span class="line">            checkNotNull(resolvedTypeInfo),</span><br><span class="line">            checkNotNull(sourceName));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、Transformation"><a href="#二、Transformation" class="headerlink" title="二、Transformation"></a>二、Transformation</h2><p>Flink 中，每个会导致“计算”或“数据分发”改变的操作都会生成一个 <code>Transformation</code>，而其中的物理算子（Physical Transformation）则会被添加到 <code>List&lt;Transformation&lt;?&gt;&gt; transformations</code>中。以 <code>map</code> 操作为例</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;R&gt; SingleOutputStreamOperator&lt;R&gt; <span class="title function_">map</span><span class="params">(</span></span><br><span class="line"><span class="params">        MapFunction&lt;T, R&gt; mapper, TypeInformation&lt;R&gt; outputType)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> transform(<span class="string">&quot;Map&quot;</span>, outputType, <span class="keyword">new</span> <span class="title class_">StreamMap</span>&lt;&gt;(clean(mapper)));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其内部调用了 <code>transform</code> 方法，而后者又调用了 <code>doTransform</code> 方法，该方法的作用是创建一个新的逻辑节点（<code>Transformation</code>），将其挂载到上游节点之后，并注册到执行环境中</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> &lt;R&gt; SingleOutputStreamOperator&lt;R&gt; <span class="title function_">doTransform</span><span class="params">(</span></span><br><span class="line"><span class="params">        String operatorName,</span></span><br><span class="line"><span class="params">        TypeInformation&lt;R&gt; outTypeInfo,</span></span><br><span class="line"><span class="params">        StreamOperatorFactory&lt;R&gt; operatorFactory)</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 当前的调用是由上游算子发起的，故此处的 Transformation 是上游算子</span></span><br><span class="line">    transformation.getOutputType();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 关联上游算子，构建逻辑算子节点</span></span><br><span class="line">    OneInputTransformation&lt;T, R&gt; resultTransform =</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">OneInputTransformation</span>&lt;&gt;(</span><br><span class="line">                    <span class="comment">// 上游算子</span></span><br><span class="line">                    <span class="built_in">this</span>.transformation,</span><br><span class="line">                    operatorName,</span><br><span class="line">                    operatorFactory,</span><br><span class="line">                    outTypeInfo,</span><br><span class="line">                    <span class="comment">// 将 StreamExecutionEnvironment 中的全局并行度设置为新算子的默认并行度</span></span><br><span class="line">                    environment.getParallelism(),</span><br><span class="line">                    <span class="literal">false</span>);</span><br><span class="line">    <span class="comment">// 构建新的 DataStream，保持 API 调用不变，可以在此基础上继续链式调用其他算子</span></span><br><span class="line">    <span class="meta">@SuppressWarnings(&#123;&quot;unchecked&quot;, &quot;rawtypes&quot;&#125;)</span></span><br><span class="line">    SingleOutputStreamOperator&lt;R&gt; returnStream =</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">SingleOutputStreamOperator</span>(environment, resultTransform);</span><br><span class="line">    <span class="comment">// 将当前算子注册到执行环境中</span></span><br><span class="line">    getExecutionEnvironment().addOperator(resultTransform);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> returnStream;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：</p>
+<ul>
+<li><code>DataStream API</code> 用于构建数据流拓扑，其内部保留两个引用，即 <code>StreamExecutionEnvironment</code> 和 <code>Transformation</code>。每个 <code>Transformation</code> 对象包含转换的元数据（名称、并行度、输出类型等）和对输入 <code>Transformation</code> 的引用。</li>
+<li>从同一个 <code>StreamExecutionEnvironment</code> 创建的 <code>DataStream</code> 共享同一个 <code>Environment</code> 实例，所有的 <code>DataStream</code> 共享相同的执行配置（如并行度、Checkpoint 设置等），所有的 <code>Transformation</code> 都注册到同一个 <code>Transformation</code> 列表中。</li>
+<li><strong>关注点分离原则</strong>：<code>DataStream</code> 负责用户 API 层面的逻辑表示，<code>Transformation</code> 负责底层的执行计划表示。</li>
+<li><strong>单输入算子</strong>是指仅接收一个逻辑输入流的数据的算子。逻辑输入流是指 <code>DataStream API</code> 中定义的上游连接关系，物理输入流是指运行时实际的数据传输路径。</li>
+<li><code>execute</code> 方法的执行是真正开始根据 <code>DataStream</code> 数据流拓扑创建 StreamGraph、JobGraph、ExecutionGraph，然后开始接收、处理数据。</li>
+</ul>
+</blockquote>
+<p>Flink 中的 <code>Transformation</code> 可以分为两类，即物理 <code>Transformation</code> 和虚拟 <code>Transformation</code>，其核心区分标准为是否继承 <code>PhysicalTransformation</code>。相比于基类 <code>Transformation</code>，<code>PhysicalTransformation</code> 额外增加了两个能力</p>
+<ol>
+<li><code>setChainingStrategy</code> 方法：控制算子是否可以与相邻算子合并到同一个线程中。</li>
+<li><code>supportsConcurrentExecutionAttempts</code> 方法：控制是否支持并发执行尝试。</li>
+</ol>
+<p>在 StreamGraph 中，每个物理 <code>Transformation</code> 都会被转换成一个真实的 <code>StreamNode</code>，对应运行时的一个算子实例，而虚拟 <code>Transformation</code> 直接继承 <code>Transformation</code>，不会转换成 <code>StreamNode</code>。</p>
+<div align=center><img    
+                       lazyload
+                       alt="image"
+                       data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260418122322868.png"
+                         style="zoom:85%;" 
+                 ></div>
+
+<h2 id="三、StreamOperator"><a href="#三、StreamOperator" class="headerlink" title="三、StreamOperator"></a>三、StreamOperator</h2><div align=center><img    
+                       lazyload
+                       alt="image"
+                       data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260417172221189.png"
+                         style="zoom:85%;" 
+                 ></div>
+
+<p><code>StreamOperator</code> 是 Flink 中所有算子的核心接口，定义了算子的生命周期、状态快照和元数据访问能力，在调用 <code>map</code> 等方法时，传入自定义处理函数，<code>StreamOperator</code> 就是用于抽象这类处理函数。其具有以下生命周期方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 在所有数据被处理前调用，执行算子的初始化操作</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">open</span><span class="params">()</span> <span class="keyword">throws</span> Exception;</span><br><span class="line"><span class="comment">// 在所有数据处理完成后调用，刷新缓冲区数据，调用后不能再向下游发送数据</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">finish</span><span class="params">()</span> <span class="keyword">throws</span> Exception;</span><br><span class="line"><span class="comment">// 在 finish 方法执行后或者 Task 发生异常导致关闭时执行，用于释放物理资源</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">close</span><span class="params">()</span> <span class="keyword">throws</span> Exception;</span><br><span class="line"><span class="comment">// 执行 Checkpoint Barrier 发出前的准备工作</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">prepareSnapshotPreBarrier</span><span class="params">(<span class="type">long</span> checkpointId)</span> <span class="keyword">throws</span> Exception;</span><br><span class="line"><span class="comment">// 执行状态快照</span></span><br><span class="line">OperatorSnapshotFutures <span class="title function_">snapshotState</span><span class="params">(</span></span><br><span class="line"><span class="params">            <span class="type">long</span> checkpointId,</span></span><br><span class="line"><span class="params">            <span class="type">long</span> timestamp,</span></span><br><span class="line"><span class="params">            CheckpointOptions checkpointOptions,</span></span><br><span class="line"><span class="params">            CheckpointStreamFactory storageLocation)</span></span><br><span class="line">            <span class="keyword">throws</span> Exception;</span><br><span class="line"><span class="comment">// 初始化或从 Checkpoint 恢复数据</span></span><br><span class="line"><span class="keyword">void</span> <span class="title function_">initializeState</span><span class="params">(StreamTaskStateInitializer streamTaskStateManager)</span> <span class="keyword">throws</span> Exception;</span><br></pre></td></tr></table></figure>
+
+<p><code>StreamOperator</code> 的子接口 <code>OneInputStreamOperator</code> 和 <code>MultipleInputStreamOperator</code> 还继承了 <code>Input</code> 接口，其内部具有处理元素的方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> <span class="title function_">processElement</span><span class="params">(StreamRecord&lt;IN&gt; element)</span> <span class="keyword">throws</span> Exception;</span><br></pre></td></tr></table></figure>
+
+<p><code>OneInputStreamOperator</code> 在 <code>StreamOperator</code> 和 <code>Input</code> 接口的基础上添加了提取 <code>key</code> 的方法，在处理 Keyed Stream 中的每一条记录之前，根据记录中的 <code>key</code> 将算子的上下文切换到对应的状态分区（State Partition）上</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">default</span> <span class="keyword">void</span> <span class="title function_">setKeyContextElement</span><span class="params">(StreamRecord&lt;IN&gt; record)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    setKeyContextElement1(record);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="四、StreamGraph"><a href="#四、StreamGraph" class="headerlink" title="四、StreamGraph"></a>四、StreamGraph</h2><p>当调用 <code>StreamExecutionEnvironment</code> 的 <code>execute</code> 方法时，生成 StreamGraph 的入口是 <code>StreamGraphGenerator</code> 的 <code>generate</code> 方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> StreamGraph <span class="title function_">generate</span><span class="params">()</span> &#123;</span><br><span class="line">    streamGraph = <span class="keyword">new</span> <span class="title class_">StreamGraph</span>(executionConfig, checkpointConfig, savepointRestoreSettings);</span><br><span class="line">    shouldExecuteInBatchMode = shouldExecuteInBatchMode();</span><br><span class="line">    configureStreamGraph(streamGraph);</span><br><span class="line"></span><br><span class="line">    alreadyTransformed = <span class="keyword">new</span> <span class="title class_">IdentityHashMap</span>&lt;&gt;();</span><br><span class="line">    <span class="comment">// 将 Transformation 转换成 StreamGraph 中的节点</span></span><br><span class="line">    <span class="keyword">for</span> (Transformation&lt;?&gt; transformation : transformations) &#123;</span><br><span class="line">        transform(transformation);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    streamGraph.setSlotSharingGroupResource(slotSharingGroupResources);</span><br><span class="line"></span><br><span class="line">    setFineGrainedGlobalStreamExchangeMode(streamGraph);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (StreamNode node : streamGraph.getStreamNodes()) &#123;</span><br><span class="line">        <span class="keyword">if</span> (node.getInEdges().stream().anyMatch(<span class="built_in">this</span>::shouldDisableUnalignedCheckpointing)) &#123;</span><br><span class="line">            <span class="keyword">for</span> (StreamEdge edge : node.getInEdges()) &#123;</span><br><span class="line">                edge.setSupportsUnalignedCheckpoints(<span class="literal">false</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> <span class="type">StreamGraph</span> <span class="variable">builtStreamGraph</span> <span class="operator">=</span> streamGraph;</span><br><span class="line"></span><br><span class="line">    alreadyTransformed.clear();</span><br><span class="line">    alreadyTransformed = <span class="literal">null</span>;</span><br><span class="line">    streamGraph = <span class="literal">null</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> builtStreamGraph;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在该方法中，会遍历所有的 <code>Transformation</code> 并调用 <code>transform</code> 方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> Collection&lt;Integer&gt; <span class="title function_">transform</span><span class="params">(Transformation&lt;?&gt; transform)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (alreadyTransformed.containsKey(transform)) &#123;</span><br><span class="line">        <span class="keyword">return</span> alreadyTransformed.get(transform);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    LOG.debug(<span class="string">&quot;Transforming &quot;</span> + transform);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (transform.getMaxParallelism() &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="comment">// 如果没有单独设置算子的最大并行度，则默认使用作业的最大并行度</span></span><br><span class="line">        <span class="type">int</span> <span class="variable">globalMaxParallelismFromConfig</span> <span class="operator">=</span> executionConfig.getMaxParallelism();</span><br><span class="line">        <span class="keyword">if</span> (globalMaxParallelismFromConfig &gt; <span class="number">0</span>) &#123;</span><br><span class="line">            transform.setMaxParallelism(globalMaxParallelismFromConfig);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 配置算子的 Slot 共享组及其资源规格</span></span><br><span class="line">    transform</span><br><span class="line">            .getSlotSharingGroup()</span><br><span class="line">            .ifPresent(</span><br><span class="line">                    slotSharingGroup -&gt; &#123;</span><br><span class="line">                        <span class="keyword">final</span> <span class="type">ResourceSpec</span> <span class="variable">resourceSpec</span> <span class="operator">=</span></span><br><span class="line">                                SlotSharingGroupUtils.extractResourceSpec(slotSharingGroup);</span><br><span class="line">                        <span class="keyword">if</span> (!resourceSpec.equals(ResourceSpec.UNKNOWN)) &#123;</span><br><span class="line">                            slotSharingGroupResources.compute(</span><br><span class="line">                                    slotSharingGroup.getName(),</span><br><span class="line">                                    (name, profile) -&gt; &#123;</span><br><span class="line">                                        <span class="keyword">if</span> (profile == <span class="literal">null</span>) &#123;</span><br><span class="line">                                            <span class="keyword">return</span> ResourceProfile.fromResourceSpec(</span><br><span class="line">                                                    resourceSpec, MemorySize.ZERO);</span><br><span class="line">                                        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!ResourceProfile.fromResourceSpec(</span><br><span class="line">                                                        resourceSpec, MemorySize.ZERO)</span><br><span class="line">                                                .equals(profile)) &#123;</span><br><span class="line">                                            <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">IllegalArgumentException</span>(</span><br><span class="line">                                                    <span class="string">&quot;The slot sharing group &quot;</span></span><br><span class="line">                                                            + slotSharingGroup.getName()</span><br><span class="line">                                                            + <span class="string">&quot; has been configured with two different resource spec.&quot;</span>);</span><br><span class="line">                                        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                                            <span class="keyword">return</span> profile;</span><br><span class="line">                                        &#125;</span><br><span class="line">                                    &#125;);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125;);</span><br><span class="line">    <span class="comment">// 获取输出类型并进行安全校验</span></span><br><span class="line">    transform.getOutputType();</span><br><span class="line">    <span class="comment">// 获取当前 Transformation 对应的 TransformationTranslator</span></span><br><span class="line">    <span class="meta">@SuppressWarnings(&quot;unchecked&quot;)</span></span><br><span class="line">    <span class="keyword">final</span> TransformationTranslator&lt;?, Transformation&lt;?&gt;&gt; translator =</span><br><span class="line">            (TransformationTranslator&lt;?, Transformation&lt;?&gt;&gt;)</span><br><span class="line">                    translatorMap.get(transform.getClass());</span><br><span class="line"></span><br><span class="line">    Collection&lt;Integer&gt; transformedIds;</span><br><span class="line">    <span class="comment">// 通过以上获取的 TransformationTranslator 将 Transformation 转换成 StreamGraph 中的节点或边，物理 Transformation 会转换成 StreamNode，虚拟 Transformation 仅将自己的语义属性附加到最终创建的 StreamEdge 上</span></span><br><span class="line">    <span class="keyword">if</span> (translator != <span class="literal">null</span>) &#123;</span><br><span class="line">        transformedIds = translate(translator, transform);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        transformedIds = legacyTransform(transform);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 避免后续重复转换</span></span><br><span class="line">    <span class="keyword">if</span> (!alreadyTransformed.containsKey(transform)) &#123;</span><br><span class="line">        alreadyTransformed.put(transform, transformedIds);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> transformedIds;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每一种 <code>Transformation</code> 都有其对应的 <code>Translator</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">    <span class="meta">@SuppressWarnings(&quot;rawtypes&quot;)</span></span><br><span class="line">    Map&lt;Class&lt;? <span class="keyword">extends</span> <span class="title class_">Transformation</span>&gt;, TransformationTranslator&lt;?, ? <span class="keyword">extends</span> <span class="title class_">Transformation</span>&gt;&gt;</span><br><span class="line">            tmp = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;();</span><br><span class="line">    tmp.put(OneInputTransformation.class, <span class="keyword">new</span> <span class="title class_">OneInputTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(TwoInputTransformation.class, <span class="keyword">new</span> <span class="title class_">TwoInputTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(MultipleInputTransformation.class, <span class="keyword">new</span> <span class="title class_">MultiInputTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(KeyedMultipleInputTransformation.class, <span class="keyword">new</span> <span class="title class_">MultiInputTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(SourceTransformation.class, <span class="keyword">new</span> <span class="title class_">SourceTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(SinkTransformation.class, <span class="keyword">new</span> <span class="title class_">SinkTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(LegacySinkTransformation.class, <span class="keyword">new</span> <span class="title class_">LegacySinkTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(LegacySourceTransformation.class, <span class="keyword">new</span> <span class="title class_">LegacySourceTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(UnionTransformation.class, <span class="keyword">new</span> <span class="title class_">UnionTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(PartitionTransformation.class, <span class="keyword">new</span> <span class="title class_">PartitionTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(SideOutputTransformation.class, <span class="keyword">new</span> <span class="title class_">SideOutputTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(ReduceTransformation.class, <span class="keyword">new</span> <span class="title class_">ReduceTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(</span><br><span class="line">            TimestampsAndWatermarksTransformation.class,</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">TimestampsAndWatermarksTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(BroadcastStateTransformation.class, <span class="keyword">new</span> <span class="title class_">BroadcastStateTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(</span><br><span class="line">            KeyedBroadcastStateTransformation.class,</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">KeyedBroadcastStateTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    tmp.put(CacheTransformation.class, <span class="keyword">new</span> <span class="title class_">CacheTransformationTranslator</span>&lt;&gt;());</span><br><span class="line">    translatorMap = Collections.unmodifiableMap(tmp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>具体的转换操作通过不同类型的 <code>Transformation</code> 各自的 <code>translateInternal</code> 方法添加节点和边</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 将 Transformation 转换成 StreamGraph 中的 StreamNode</span></span><br><span class="line">streamGraph.addOperator(</span><br><span class="line">    transformationId,</span><br><span class="line">    slotSharingGroup,</span><br><span class="line">    transformation.getCoLocationGroupKey(),</span><br><span class="line">    operatorFactory,</span><br><span class="line">    inputType,</span><br><span class="line">    transformation.getOutputType(),</span><br><span class="line">    transformation.getName());</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在上游算子和当前算子之间添加边（OneInputTransformation 只允许有一个上游输入）</span></span><br><span class="line"><span class="keyword">for</span> (Integer inputId : context.getStreamNodeIds(parentTransformations.get(<span class="number">0</span>))) &#123;</span><br><span class="line">    streamGraph.addEdge(inputId, transformationId, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>添加节点是通过 <code>addNode</code> 方法实现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> StreamNode <span class="title function_">addNode</span><span class="params">(</span></span><br><span class="line"><span class="params">        Integer vertexID,</span></span><br><span class="line"><span class="params">        <span class="meta">@Nullable</span> String slotSharingGroup,</span></span><br><span class="line"><span class="params">        <span class="meta">@Nullable</span> String coLocationGroup,</span></span><br><span class="line"><span class="params">        Class&lt;? extends TaskInvokable&gt; vertexClass,</span></span><br><span class="line"><span class="params">        StreamOperatorFactory&lt;?&gt; operatorFactory,</span></span><br><span class="line"><span class="params">        String operatorName)</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (streamNodes.containsKey(vertexID)) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">RuntimeException</span>(<span class="string">&quot;Duplicate vertexID &quot;</span> + vertexID);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 创建 StreamNode 并添加到 Map 中</span></span><br><span class="line">    <span class="type">StreamNode</span> <span class="variable">vertex</span> <span class="operator">=</span></span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">StreamNode</span>(</span><br><span class="line">                    vertexID,</span><br><span class="line">                    slotSharingGroup,</span><br><span class="line">                    coLocationGroup,</span><br><span class="line">                    operatorFactory,</span><br><span class="line">                    operatorName,</span><br><span class="line">                    vertexClass);</span><br><span class="line"></span><br><span class="line">    streamNodes.put(vertexID, vertex);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> vertex;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>添加边是通过 <code>addEdgeInternal</code> 方法实现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 负责解析虚拟节点并最终在物理节点之间创建边</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> upStreamVertexID 上游节点 ID，可能是虚拟节点</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> downStreamVertexID 下游节点 ID，物理节点，边都是建立在物理节点之间的</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> typeNumber 表示当前边连接到下游算子的第一个输入，对于单输入算子，取值仅为 0，表示唯一的输入，对于双输入算子，取值为 0 和 1，对于多输入算子，取值为 0 到 n-1</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> outputTag 侧输出标签，如果是侧输出边，则该值不为 null，表示连接到下游算子的哪个侧输出</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> partitioner 上游到下游的分区策略</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> exchangeMode 数据交换模式</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">addEdgeInternal</span><span class="params">(</span></span><br><span class="line"><span class="params">        Integer upStreamVertexID,</span></span><br><span class="line"><span class="params">        Integer downStreamVertexID,</span></span><br><span class="line"><span class="params">        <span class="type">int</span> typeNumber,</span></span><br><span class="line"><span class="params">        StreamPartitioner&lt;?&gt; partitioner,</span></span><br><span class="line"><span class="params">        List&lt;String&gt; outputNames,</span></span><br><span class="line"><span class="params">        OutputTag outputTag,</span></span><br><span class="line"><span class="params">        StreamExchangeMode exchangeMode,</span></span><br><span class="line"><span class="params">        IntermediateDataSetID intermediateDataSetId)</span> &#123;</span><br><span class="line">    <span class="comment">// 如果上游是虚拟侧输出节点</span></span><br><span class="line">    <span class="keyword">if</span> (virtualSideOutputNodes.containsKey(upStreamVertexID)) &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">virtualId</span> <span class="operator">=</span> upStreamVertexID;</span><br><span class="line">        <span class="comment">// 取出真实上游物理节点 id</span></span><br><span class="line">        upStreamVertexID = virtualSideOutputNodes.get(virtualId).f0;</span><br><span class="line">        <span class="comment">// 获取 outputTag，下游据此消费特定标签的侧输出</span></span><br><span class="line">        <span class="keyword">if</span> (outputTag == <span class="literal">null</span>) &#123;</span><br><span class="line">            outputTag = virtualSideOutputNodes.get(virtualId).f1;</span><br><span class="line">        &#125;</span><br><span class="line">        addEdgeInternal(</span><br><span class="line">                upStreamVertexID,</span><br><span class="line">                downStreamVertexID,</span><br><span class="line">                typeNumber,</span><br><span class="line">                partitioner,</span><br><span class="line">                <span class="literal">null</span>,</span><br><span class="line">                outputTag,</span><br><span class="line">                exchangeMode,</span><br><span class="line">                intermediateDataSetId);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 上游是虚拟分区节点</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (virtualPartitionNodes.containsKey(upStreamVertexID)) &#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">virtualId</span> <span class="operator">=</span> upStreamVertexID;</span><br><span class="line">        <span class="comment">// 获取真实上游节点 ID</span></span><br><span class="line">        upStreamVertexID = virtualPartitionNodes.get(virtualId).f0;</span><br><span class="line">        <span class="keyword">if</span> (partitioner == <span class="literal">null</span>) &#123;</span><br><span class="line">            partitioner = virtualPartitionNodes.get(virtualId).f1;</span><br><span class="line">        &#125;</span><br><span class="line">        exchangeMode = virtualPartitionNodes.get(virtualId).f2;</span><br><span class="line">        addEdgeInternal(</span><br><span class="line">                upStreamVertexID,</span><br><span class="line">                downStreamVertexID,</span><br><span class="line">                typeNumber,</span><br><span class="line">                partitioner,</span><br><span class="line">                outputNames,</span><br><span class="line">                outputTag,</span><br><span class="line">                exchangeMode,</span><br><span class="line">                intermediateDataSetId);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 上游已经是真实节点，边都是建立在物理节点之间</span></span><br><span class="line">    <span class="keyword">else</span> &#123;</span><br><span class="line">        createActualEdge(</span><br><span class="line">                upStreamVertexID,</span><br><span class="line">                downStreamVertexID,</span><br><span class="line">                typeNumber,</span><br><span class="line">                partitioner,</span><br><span class="line">                outputTag,</span><br><span class="line">                exchangeMode,</span><br><span class="line">                intermediateDataSetId);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** 在节点之间创建边的核心方法 */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">createActualEdge</span><span class="params">(</span></span><br><span class="line"><span class="params">        Integer upStreamVertexID,</span></span><br><span class="line"><span class="params">        Integer downStreamVertexID,</span></span><br><span class="line"><span class="params">        <span class="type">int</span> typeNumber,</span></span><br><span class="line"><span class="params">        StreamPartitioner&lt;?&gt; partitioner,</span></span><br><span class="line"><span class="params">        OutputTag outputTag,</span></span><br><span class="line"><span class="params">        StreamExchangeMode exchangeMode,</span></span><br><span class="line"><span class="params">        IntermediateDataSetID intermediateDataSetId)</span> &#123;</span><br><span class="line">    <span class="type">StreamNode</span> <span class="variable">upstreamNode</span> <span class="operator">=</span> getStreamNode(upStreamVertexID);</span><br><span class="line">    <span class="type">StreamNode</span> <span class="variable">downstreamNode</span> <span class="operator">=</span> getStreamNode(downStreamVertexID);</span><br><span class="line">    <span class="comment">// 如果没有指定分区策略并且上下游并行度相同，则使用前向分区策略</span></span><br><span class="line">    <span class="keyword">if</span> (partitioner == <span class="literal">null</span></span><br><span class="line">            &amp;&amp; upstreamNode.getParallelism() == downstreamNode.getParallelism()) &#123;</span><br><span class="line">        partitioner =</span><br><span class="line">                dynamic ? <span class="keyword">new</span> <span class="title class_">ForwardForUnspecifiedPartitioner</span>&lt;&gt;() : <span class="keyword">new</span> <span class="title class_">ForwardPartitioner</span>&lt;&gt;();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 如果没有指定分区策略且上下游并行度不同，则使用重平衡分区器，记录轮询发送给所有下游并行子任务</span></span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (partitioner == <span class="literal">null</span>) &#123;</span><br><span class="line">        partitioner = <span class="keyword">new</span> <span class="title class_">RebalancePartitioner</span>&lt;Object&gt;();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (partitioner <span class="keyword">instanceof</span> ForwardPartitioner) &#123;</span><br><span class="line">        <span class="keyword">if</span> (upstreamNode.getParallelism() != downstreamNode.getParallelism()) &#123;</span><br><span class="line">            <span class="keyword">if</span> (partitioner <span class="keyword">instanceof</span> ForwardForConsecutiveHashPartitioner) &#123;</span><br><span class="line">                partitioner =</span><br><span class="line">                        ((ForwardForConsecutiveHashPartitioner&lt;?&gt;) partitioner)</span><br><span class="line">                                .getHashPartitioner();</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">UnsupportedOperationException</span>(</span><br><span class="line">                        <span class="string">&quot;Forward partitioning does not allow &quot;</span></span><br><span class="line">                                + <span class="string">&quot;change of parallelism. Upstream operation: &quot;</span></span><br><span class="line">                                + upstreamNode</span><br><span class="line">                                + <span class="string">&quot; parallelism: &quot;</span></span><br><span class="line">                                + upstreamNode.getParallelism()</span><br><span class="line">                                + <span class="string">&quot;, downstream operation: &quot;</span></span><br><span class="line">                                + downstreamNode</span><br><span class="line">                                + <span class="string">&quot; parallelism: &quot;</span></span><br><span class="line">                                + downstreamNode.getParallelism()</span><br><span class="line">                                + <span class="string">&quot; You must use another partitioning strategy, such as broadcast, rebalance, shuffle or global.&quot;</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (exchangeMode == <span class="literal">null</span>) &#123;</span><br><span class="line">        <span class="comment">// 表示根据作业类型（STREAMING 或 BATCH）和全局配置自动决定实际的数据交换模式 PIPELINED 或 BLOCKING，流作业通常是前者</span></span><br><span class="line">        exchangeMode = StreamExchangeMode.UNDEFINED;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 首先计算上游算子和下游算子之间的已经存在的边的条数，将该值作为新边的唯一ID，当同一对节点之间存在多条边时，每条边需要有不同的 ID 才能被 StreamTask 正确区分并分配 RecordWriter（不需要在所有 StreamEdge 中全局唯一，只需要确保连接同一节点的不同边之间是唯一的）</span></span><br><span class="line">    <span class="type">int</span> <span class="variable">uniqueId</span> <span class="operator">=</span> getStreamEdges(upstreamNode.getId(), downstreamNode.getId()).size();</span><br><span class="line"></span><br><span class="line">    <span class="type">StreamEdge</span> <span class="variable">edge</span> <span class="operator">=</span></span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">StreamEdge</span>(</span><br><span class="line">                    upstreamNode,</span><br><span class="line">                    downstreamNode,</span><br><span class="line">                    typeNumber,</span><br><span class="line">                    partitioner,</span><br><span class="line">                    outputTag,</span><br><span class="line">                    exchangeMode,</span><br><span class="line">                    uniqueId,</span><br><span class="line">                    intermediateDataSetId);</span><br><span class="line"></span><br><span class="line">    getStreamNode(edge.getSourceId()).addOutEdge(edge);</span><br><span class="line">    getStreamNode(edge.getTargetId()).addInEdge(edge);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>综上，所有的 <code>StreamNode</code> 和 <code>StreamEdge</code> 构成了一张完整的 <code>StreamGraph</code>。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文介绍了 Flink 1.18 中的四张图以及它们之间的关系、<code>StreamExecutionEnvironment</code> 的职责以及获取方式、<code>Transformation</code> 及其创建方式、<code>StreamOperator</code> 的作用、构建 StreamGraph 的核心步骤。</p>
+
+                    
+                </div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Flink/">Flink</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                            <div class="prev-post">
+                                <a class="prev"
+                                   rel="prev"
+                                   href="/2026/04/21/Flink-%E4%B8%AD%E7%9A%84-JobGraph-%E6%98%AF%E5%A6%82%E4%BD%95%E7%94%9F%E6%88%90%E7%9A%84%EF%BC%9F/"
+                                   title="Flink 中的 JobGraph 是如何生成的？"
+                                >
+                                    <span class="left arrow-icon flex-center">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Flink 中的 JobGraph 是如何生成的？</span>
+                                        <span class="post-nav-item">上一篇</span>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2026/04/09/Flink-%E5%A6%82%E4%BD%95%E8%AF%BB%E5%8F%96-flink-conf-yaml-%E5%B9%B6%E5%B0%86%E5%85%B6%E8%BD%AC%E6%8D%A2%E4%B8%BA%E5%85%A8%E5%B1%80%E5%8F%AF%E7%94%A8%E7%9A%84-Configuration-%E5%AF%B9%E8%B1%A1%EF%BC%9F/"
+                                   title="Flink 如何读取 flink-conf.yaml 并将其转换为全局可用的 Configuration 对象？"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Flink 如何读取 flink-conf.yaml 并将其转换为全局可用的 Configuration 对象？</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81StreamExecutionEnvironment"><span class="nav-text">一、StreamExecutionEnvironment</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Transformation"><span class="nav-text">二、Transformation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81StreamOperator"><span class="nav-text">三、StreamOperator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81StreamGraph"><span class="nav-text">四、StreamGraph</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2025</span>&nbsp;-&nbsp;2026
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">Shen Huanglin</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81StreamExecutionEnvironment"><span class="nav-text">一、StreamExecutionEnvironment</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Transformation"><span class="nav-text">二、Transformation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81StreamOperator"><span class="nav-text">三、StreamOperator</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81StreamGraph"><span class="nav-text">四、StreamGraph</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+
+<!-- lazyload -->
+
+    
+<script src="/js/lazyload.js"></script>
+
+
+
+<div class="">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+
+
+</body>
+</html>

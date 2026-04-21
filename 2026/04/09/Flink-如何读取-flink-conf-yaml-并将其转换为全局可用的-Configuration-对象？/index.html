@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="Hexo Theme Keep">
+    <meta name="author" content="Shen Huanglin">
+    
+    <title>
+        
+            Flink 如何读取 flink-conf.yaml 并将其转换为全局可用的 Configuration 对象？ |
+        
+        Go For It !
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/favicon.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#757485","title":"Go For It !","author":"Shen Huanglin","avatar":"/images/touxiang.jpg","favicon":"/images/favicon.png"},"menu":{"home":"/","archives":"/archives"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"Keep writing and Keep loving.","hitokoto":true},"social_contact":{"enable":false,"links":{"github":null,"weixin":null,"qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":true,"hide_header":true},"home":{"announcement":null,"category":true,"tag":false,"post_datetime":"created"},"post":{"author_badge":{"enable":false,"level_badge":false,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":false,"min2read":false},"datetime_format":"YYYY 年 MM 月 DD 日","copyright_info":false,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null}},"code_block":{"tools":{"enable":true,"style":"mac"},"highlight_theme":"default"},"toc":{"enable":true,"number":false,"expand_all":false,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":false,"site_uv":false,"site_pv":true,"page_pv":true}},"local_search":{"enable":false,"preload":false},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":true},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":false},"footer":{"since":2025,"word_count":false,"site_deploy":{"enable":false,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+            <a class="site-name border-box" href="/">
+               Go For It !
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        Flink 如何读取 flink-conf.yaml 并将其转换为全局可用的 Configuration 对象？
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/touxiang.jpg">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">Shen Huanglin</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2026 年 04 月 09 日</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date" style="display: none;" >
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Tue Apr 21 2026 16:23:18 GMT+0800">2026 年 04 月 21 日</span>
+                </span>
+            
+        
+
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Flink/">Flink</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+        
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <p>在 Flink 中，将磁盘上的 <code>flink-conf.yaml</code> 转换为内存中全局可用的 <code>Configuration</code> 对象是整个集群启动的第一步，其过程可以拆解为“<strong>配置加载 + 对象实例化</strong>”两个过程，其中，“配置加载”主要通过 <code>config.sh</code> 脚本实现。</p>
+<h2 id="一、config-sh"><a href="#一、config-sh" class="headerlink" title="一、config.sh"></a>一、config.sh</h2><p>该脚本是整个 Flink 脚本体系的基石，它负责构建所有 Flink 进程所需的<strong>运行时环境</strong>。</p>
+<h3 id="1-1-执行时机"><a href="#1-1-执行时机" class="headerlink" title="1.1 执行时机"></a>1.1 执行时机</h3><p><code>config.sh</code> 并不是一个由用户直接运行的脚本，而是一个会被其他脚本引入的辅助脚本</p>
+<ol>
+<li><p>命令行操作：当执行 <code>./bin/flink run</code> 命令提交作业时，<code>flink</code> 脚本（<code>build-target/bin/flink</code>）会首先引入 <code>config.sh</code>。</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">. &quot;$bin&quot;/config.sh</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>集群启动：执行 <code>./bin/start-cluster.sh</code> 时，该脚本也会引入 <code>config.sh</code>。</p>
+</li>
+<li><p>单进程启动：在 Yarn 或 Kubernetes 环境中，容器启动命令直接调用 <code>jobmanager.sh</code> 或 <code>taskmanager.sh</code>，这些脚本中也会加载 <code>config.sh</code>。</p>
+</li>
+</ol>
+<blockquote>
+<p>集群启动和单进程启动的区别：</p>
+<ul>
+<li><p>集群启动：通常指通过 Flink 自带的脚本拉起一个完整的分布式环境，通常在 <strong>Standalone</strong> 模式下使用。</p>
+<p>  ① 入口脚本：<code>./bin/start-cluster.sh</code>。</p>
+<p>  ② 编排机制：<strong>脚本驱动</strong>（通过执行入口脚本在当前节点调用 <code>jobmanager.sh</code> 启动 JobManager 进程） + <strong>分布式扇出</strong>（调用 <code>config.sh</code> 中的 <code>TMWorkers</code> 函数，它会读取 <code>conf/workers</code> 文件中的主机列表，通过 ssh 或 pdsh 在远程机器逐一调用 <code>taskmanager.sh</code>）。</p>
+<p>  ③ 生命周期：集群的生命周期与具体的作业无关，用户可多次提交作业共享集群的资源。</p>
+<p>  ④ 资源分配：资源是静态的，若 TaskManager 的 Slot 用完，新作业将无法运行，直到旧作业释放资源。</p>
+</li>
+<li><p>单进程启动：通常指直接运行 <code>jobmanager.sh</code> 或 <code>taskmanager.sh</code> 启动一个特定的节点，在 <strong>Yarn、Kubernetes 或应用模式</strong>中是标准做法。</p>
+<p>  ① 入口脚本：直接调用 <code>./bin/jobmanager.sh</code> 或 <code>./bin/taskmanager.sh</code>。</p>
+<p>  ② 编排机制：<strong>外部管理驱动</strong>（在 K8s 环境中，K8s 控制器负责创建 Pod，并在 Pod 的启动命令中直接运行 <code>jobmanager.sh</code>） + <strong>按需拉起</strong>（在 Active 模式下，JobManager 的 ResourceManager 会动态向外部资源管理器申请容器并启动新的 TaskManager 进程）。</p>
+<p>  ③ 生命周期：在 Application 模式或 Per-Job 模式下，进程的生命周期与 Job 绑定，一旦 Job 完成，JobManager 和 TaskManager 进程都会被销毁并释放资源。</p>
+</li>
+</ul>
+</blockquote>
+<h3 id="1-2-核心作用"><a href="#1-2-核心作用" class="headerlink" title="1.2 核心作用"></a>1.2 核心作用</h3><p><strong>该脚本的核心职责是“环境标准化”，确保在任意环境下启动时，Flink 进程都能获得一致的参数。</strong></p>
+<ol>
+<li><p>计算 <code>FLINK_HOME</code> 的绝对路径，防止因相对路径导致的文件找不到问题。</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">先检查 _FLINK_HOME_DETERMINED 变量是否为空或者未设置，如果已经在 Shell 环境中预先设置并 <span class="built_in">export</span> 了该变量，则跳过。SYMLINK_RESOLVED_BIN 是脚本在前期通过递归解析软链接后得到的 bin 目录的绝对物理路径，<span class="built_in">dirname</span> 命令用于获取其父目录，使得变量 FLINK_HOME 指向 Flink 的安装根目录。</span></span><br><span class="line">if [ -z &quot;$_FLINK_HOME_DETERMINED&quot; ]; then</span><br><span class="line">    FLINK_HOME=`dirname &quot;$SYMLINK_RESOLVED_BIN&quot;`</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>定位配置文件 <code>flink-conf.yaml</code> 所在的目录。</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">if [ -z &quot;$FLINK_CONF_DIR&quot; ]; then </span><br><span class="line">	FLINK_CONF_DIR=$FLINK_HOME_DIR_MANGLED/conf; fi</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：也是采用“<strong>先环境变量后默认值</strong>”的原则。</p>
+</blockquote>
+</li>
+<li><p>寻找并校验 <code>JAVA_HOME</code>，确保 JVM 版本符合要求。</p>
+ <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">读取 flink-conf.yaml 中是否有指定的 Java 版本，如果没有就使用系统环境变量中的 Java 版本</span></span><br><span class="line">MY_JAVA_HOME=$(readFromConfig $&#123;KEY_ENV_JAVA_HOME&#125; &quot;&quot; &quot;$&#123;YAML_CONF&#125;&quot;)</span><br><span class="line">if [ -z &quot;$&#123;MY_JAVA_HOME&#125;&quot; ]; then</span><br><span class="line">    MY_JAVA_HOME=&quot;$&#123;JAVA_HOME&#125;&quot;</span><br><span class="line">fi</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">校验是否获取到有效的 JAVA_HOME，没有就强制退出</span></span><br><span class="line">if [ -z &quot;$&#123;MY_JAVA_HOME&#125;&quot; ] &amp;&amp; ! type java &gt; /dev/null 2&gt; /dev/null; then</span><br><span class="line">    echo &quot;Please specify JAVA_HOME. Either in Flink config ./conf/flink-conf.yaml or as system-wide JAVA_HOME.&quot;</span><br><span class="line">    exit 1</span><br><span class="line">else</span><br><span class="line">    JAVA_HOME=&quot;$&#123;MY_JAVA_HOME&#125;&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>扫描 <code>lib/</code> 目录，将 Flink 内核 Jar 包、插件和依赖加入到 Classpath 中，通过 <code>constructFlinkClassPath</code> 函数实现。</p>
+</li>
+<li><p>根据配置文件计算 JobManager 和 TaskManager 的内存堆大小、GC 策略等，通过 <code>parseResourceParamsAndExportLogs</code> 函数实现。</p>
+</li>
+</ol>
+<h3 id="1-3-export"><a href="#1-3-export" class="headerlink" title="1.3 export"></a>1.3 export</h3><p>在 <code>config.sh</code> 脚本中，<code>FLINK_CONF_DIR</code>、<code>FLINK_BIN_DIR</code>、<code>FLINK_LIB_DIR</code> 等都会被执行 <code>export</code> 命令，因为在 Linux Shell 中，普通变量仅在当前脚本进程中可见，<code>export</code> 命令会将该变量放入当前进程的 Environment Block（环境块）中，这是一个由 <code>\0</code> 分隔的连续字符串区域。当启动 JobManager 和 TaskManager 时，以上环境变量字符串会被拷贝到物理内存中，当 Flink 的中第一次尝试通过 <code>System.getenv()</code> 获取变量时，会触发 <code>java.lang.ProcessEnvironment</code> 类的<strong>静态初始化</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> &#123;</span><br><span class="line">    <span class="comment">// 将物理内存中的原始字节拷贝到 Java 堆内存中，形成字节数组</span></span><br><span class="line">    <span class="type">byte</span>[][] environ = environ();</span><br><span class="line">    <span class="comment">// 由于 HashMap 遇到重复的 Key 时会使用新值覆盖旧值，而根据 POSIX 标准，如果环境块中存在同名的 Key，以先出现的为准，因此采用从后往前遍历，确保数组中靠前的变量能够覆盖靠后的变量。遍历完成后，FLINK_CONF_DIR 等从字节数组变成 Java 堆中的 String 对象，并存储在 HashMap 中</span></span><br><span class="line">    theEnvironment = <span class="keyword">new</span> <span class="title class_">HashMap</span>&lt;&gt;(environ.length/<span class="number">2</span> + <span class="number">3</span>);</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> environ.length-<span class="number">1</span>; i &gt; <span class="number">0</span>; i-=<span class="number">2</span>)</span><br><span class="line">        theEnvironment.put(Variable.valueOf(environ[i-<span class="number">1</span>]), <span class="comment">// 取出 Key 的字节数组转换</span></span><br><span class="line">                           Value.valueOf(environ[i])); <span class="comment">// 取出 Value 的字节数组转换</span></span><br><span class="line">    <span class="comment">// 封装成只读的集合，作为不可变快照</span></span><br><span class="line">    theUnmodifiableEnvironment</span><br><span class="line">        = Collections.unmodifiableMap</span><br><span class="line">        (<span class="keyword">new</span> <span class="title class_">StringEnvironment</span>(theEnvironment));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>后续直接从不可变快照中返回对应的值，而不再读取操作系统的物理内存</strong>。</p>
+<blockquote>
+<p>注：在 Linux Shell 中，界定进程边界的核心是调用脚本的方式，例如使用 <code>source config.sh</code> 或者 <code>. config.sh</code> 则不会创建新进程，而是在当前进程中直接读取并执行脚本的内容，<code>config.sh</code> 中定义的所有变量会直接进入当前进程的变量空间中；如果使用 <code>./jobmanager.sh</code> 或者 <code>jobmanager.sh start</code> 则会创建新的进程。</p>
+</blockquote>
+<h2 id="二、对象实例化"><a href="#二、对象实例化" class="headerlink" title="二、对象实例化"></a>二、对象实例化</h2><p>当 JobManager 和 TaskManager 启动时，会调用 <code>GlobalConfiguration.loadConfiguration()</code> 方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> Configuration <span class="title function_">loadConfiguration</span><span class="params">(Configuration dynamicProperties)</span> &#123;</span><br><span class="line">    	<span class="comment">// 获取配置文件的目录</span></span><br><span class="line">        <span class="keyword">final</span> <span class="type">String</span> <span class="variable">configDir</span> <span class="operator">=</span> System.getenv(ConfigConstants.ENV_FLINK_CONF_DIR);</span><br><span class="line">        <span class="keyword">if</span> (configDir == <span class="literal">null</span>) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Configuration</span>(dynamicProperties);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> loadConfiguration(configDir, dynamicProperties);</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>注：在 JobManager 的启动过程中，该方法的调用发生在其入口类（<code>Entrypoint</code>）中，如 <code>StandaloneSessionClusterEntrypoint</code>（Standalone 模式）、<code>KubernetesSessionClusterEntrypoint</code>（KubernetesSession 模式）、<code>YarnSessionClusterEntrypoint</code>（Yarn 模式），TaskManager 则发生在 <code>TaskManagerRunner</code> 中。</p>
+</blockquote>
+<p>当读取到配置文件后，通过 <code>loadYAMLResource</code> 方法解析 yaml 文件并将键值对保存到 <code>Configuration</code> 类中（本质上是一个经过封装的 <code>Map&lt;String, Object&gt;</code>，用于存储所有的配置项）。当读取完配置文件中的配置项后，Flink 还会将命令行中通过 <code>-D</code> 参数传入的动态属性（Dynamic Properties）合并到 <code>Configuration</code> 中，且命令行参数的优先级更高。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (dynamicProperties != <span class="literal">null</span>) &#123;</span><br><span class="line">    configuration.addAll(dynamicProperties);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>配置对象形成后会传递到集群的所有核心组件。在 JobManager 端，Dispatcher 通过配置对象确定 WebUI 的端口、作业恢复的存储路径等，ResourceManager 利用配置中的资源规格管理和申请 Slot，JobMaster 根据配置决定 Checkpoint 的间隔、重启策略以及生成 ExecutionGraph 的调度行为。在 TaskManager 端，TaskExecutor 根据配置初始化 Memory Manager（划分堆内外内存）和 Netty Stack（配置 Netty 缓冲区），Task Slot 根据配置中的内存比例，将 Managed Memory（托管内存）平分给各个 Slot。其余还有 Actor System、IO Manager、Heartbeat Manager 等关键组件的初始化依赖。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文梳理了 Flink 1.18 中 <code>config.sh</code> 脚本的执行时机、核心作用以及被 <code>export</code> 的变量如何在 Flink 中被读取到，之后如何转换为 <code>Configuration</code> 对象的过程。</p>
+
+                    
+                </div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Flink/">Flink</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                            <div class="prev-post">
+                                <a class="prev"
+                                   rel="prev"
+                                   href="/2026/04/17/Flink-%E4%B8%AD%E7%9A%84-StreamGraph-%E6%98%AF%E5%A6%82%E4%BD%95%E7%94%9F%E6%88%90%E7%9A%84%EF%BC%9F/"
+                                   title="Flink 中的 StreamGraph 是如何生成的？"
+                                >
+                                    <span class="left arrow-icon flex-center">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Flink 中的 StreamGraph 是如何生成的？</span>
+                                        <span class="post-nav-item">上一篇</span>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2026/04/02/Flink-%E6%9E%B6%E6%9E%84/"
+                                   title="Flink 架构"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Flink 架构</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81config-sh"><span class="nav-text">一、config.sh</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E6%89%A7%E8%A1%8C%E6%97%B6%E6%9C%BA"><span class="nav-text">1.1 执行时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E6%A0%B8%E5%BF%83%E4%BD%9C%E7%94%A8"><span class="nav-text">1.2 核心作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-export"><span class="nav-text">1.3 export</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%AF%B9%E8%B1%A1%E5%AE%9E%E4%BE%8B%E5%8C%96"><span class="nav-text">二、对象实例化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2025</span>&nbsp;-&nbsp;2026
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">Shen Huanglin</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81config-sh"><span class="nav-text">一、config.sh</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-%E6%89%A7%E8%A1%8C%E6%97%B6%E6%9C%BA"><span class="nav-text">1.1 执行时机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-%E6%A0%B8%E5%BF%83%E4%BD%9C%E7%94%A8"><span class="nav-text">1.2 核心作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-export"><span class="nav-text">1.3 export</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%AF%B9%E8%B1%A1%E5%AE%9E%E4%BE%8B%E5%8C%96"><span class="nav-text">二、对象实例化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+
+<!-- lazyload -->
+
+    
+<script src="/js/lazyload.js"></script>
+
+
+
+<div class="">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+
+
+</body>
+</html>

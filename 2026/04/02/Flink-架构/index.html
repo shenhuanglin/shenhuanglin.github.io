@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="Hexo Theme Keep">
+    <meta name="author" content="Shen Huanglin">
+    
+    <title>
+        
+            Flink 架构 |
+        
+        Go For It !
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/favicon.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"example.com","root":"/","language":"zh-CN"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#757485","title":"Go For It !","author":"Shen Huanglin","avatar":"/images/touxiang.jpg","favicon":"/images/favicon.png"},"menu":{"home":"/","archives":"/archives"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"Keep writing and Keep loving.","hitokoto":true},"social_contact":{"enable":false,"links":{"github":null,"weixin":null,"qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":true,"hide_header":true},"home":{"announcement":null,"category":true,"tag":false,"post_datetime":"created"},"post":{"author_badge":{"enable":false,"level_badge":false,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":false,"min2read":false},"datetime_format":"YYYY 年 MM 月 DD 日","copyright_info":false,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null}},"code_block":{"tools":{"enable":true,"style":"mac"},"highlight_theme":"default"},"toc":{"enable":true,"number":false,"expand_all":false,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":false,"site_uv":false,"site_pv":true,"page_pv":true}},"local_search":{"enable":false,"preload":false},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":true},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":false},"footer":{"since":2025,"word_count":false,"site_deploy":{"enable":false,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+            <a class="site-name border-box" href="/">
+               Go For It !
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        Flink 架构
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/touxiang.jpg">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">Shen Huanglin</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2026 年 04 月 02 日</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date" style="display: none;" >
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Wed Apr 22 2026 00:21:30 GMT+0800">2026 年 04 月 22 日</span>
+                </span>
+            
+        
+
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Flink/">Flink</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+        
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <p>Flink 运行时由两种类型的进程组成：<strong>一个 JobManager</strong> 和<strong>一个或多个 TaskManager</strong>。</p>
+<div align=center><img    
+                       lazyload
+                       alt="image"
+                       data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260402224215294.png"
+                         style="zoom:30%;" 
+                 ></div>
+
+<h2 id="一、Client"><a href="#一、Client" class="headerlink" title="一、Client"></a>一、Client</h2><p>用于准备数据流并将其发送给 JobManager，可以作为 Java 程序的一部分执行，也可以在命令行进程 <code>./bin/flink run ...</code> 中运行。</p>
+<h2 id="二、JobManager"><a href="#二、JobManager" class="headerlink" title="二、JobManager"></a>二、JobManager</h2><div align=center><img    
+                       lazyload
+                       alt="image"
+                       data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260402224232369.png"
+                         style="zoom:100%;" 
+                 ></div>
+
+<p>用于负责作业的管理、资源的调度以及任务的协调。包含以下组件</p>
+<ol>
+<li><p><strong>ResourceManager</strong>：负责管理所有 TaskManager 提供的 Task Slot（任务槽位，Flink 集群中资源调度的单位）。当 JobMaster 请求资源时，RM 会向外部资源管理器（如 K8s、Yarn）申请新的 TaskManager 或从已有的 TaskManager 中分配槽位。在 Active 模式（K8s、Yarn）下，RM 具有扩缩容权，会动态地根据 SlotRequest 的积压情况增减 TM 的数量，但是在 Standalone 模式下 RM 无法向“外部”申请，如果 Slot 不够，作业会一直处于 <code>CREATED</code> 状态等待，直到有其他作业释放资源。</p>
+</li>
+<li><p><strong>Dispatcher</strong>：接收 Client 提交的 JobGraph 并为每个提交的作业启动一个新的 JobMaster 进程，同时负责运行 Flink WebUI，展示作业状态。在高可用（HA）模式下，还会负责在 JobManager 失败后从存储中恢复作业。</p>
+</li>
+<li><p><strong>JobMaster</strong>：管理作业的生命周期，负责作业从启动、运行到最终完成或失败的全过程。将逻辑上的 JobGraph 转换成可执行的 ExecutionGraph。</p>
+<blockquote>
+<p>JobGraph：也称为 Logical Graph，根据提交的作业创建有向无环图，顶点是算子，边定义算子的输入&#x2F;输出关系，并对应于数据流或数据集。</p>
+</blockquote>
+</li>
+<li><p><strong>SlotPool</strong>：每个 JobMaster 都有自己槽位池，当作业启动时，先查看自己的 SlotPool 中是否有空闲的资源，若没有，则向 ResourceManager 申请，实现了作业内部资源的复用，减少频繁向全局资源管理器申请资源的开销。</p>
+</li>
+<li><p><strong>Dataflow Graph（ExecutionGraph）</strong>：Client 提交的是 JobGraph，JobMaster 将其转换为 ExecutionGraph，其记录了每个并行子任务的状态、部署位置以及中间结果分区，是所有调度决策的数据源。</p>
+</li>
+<li><p><strong>Scheduler</strong>：负责向 ResourceManager 申请 Slot，将 ExecutionGraph 中的任务部署到选定的 TaskManager 上，并进行异常处理，即若某个 Task 挂了，Scheduler 负责根据重启策略决定重启单个 Task 还是整个作业。</p>
+</li>
+<li><p><strong>Checkpoint Coordinator</strong>：负责状态一致性，周期性地向 Source 算子注入 Barrier，接收来自各个 TaskManager 的状态快照确认，当所有 Task 都确认完成后，将该 Checkpoint 标记为完成，并更新 Metadata。</p>
+</li>
+<li><p><strong>Actor System</strong>：Flink 集群的 RPC 通信组件，JobManager 和 TaskManager 以及 Client 之间通信均通过 Actor System 实现，TM 之间的数据传递则是通过 Netty 实现。</p>
+</li>
+</ol>
+<p>至少有一个 JobManager，高可用（HA）设置中有多个 JobManager，其中一个始终是 Leader，其他的是 Standby（备用实例）。</p>
+<h2 id="三、TaskManager"><a href="#三、TaskManager" class="headerlink" title="三、TaskManager"></a>三、TaskManager</h2><p>TaskManager 也称为 Worker，<strong>负责实际执行计算任务并管理本地资源</strong>。TaskManager 运行着 Flink 作业分解后产生的 Task（任务），<strong>一个 Task 是 JobGraph 中一个算子链的并行实例</strong>。至少有一个 TaskManager，其资源调度的最小单位是 Task Slot，<strong>Task Slot 的数量表示并发处理的 Task 的数量</strong>。TaskManager 由以下几个部分组成</p>
+<div align=center><img    
+                       lazyload
+                       alt="image"
+                       data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260402224240972.png"
+                         style="zoom:90%;" 
+                 ></div>
+
+<ol>
+<li><strong>TaskExecutor</strong>：TaskManager 进程的入口，负责任务生命周期管理（接收来自 JobMaster 的部署请求，启动、停止、取消 Task）、状态汇报（维护任务的运行状态并定期向 JobMaster 汇报）和心跳机制（与 ResourceManager 和 JobMaster 保持心跳）。</li>
+<li><strong>Task Slot</strong>：TM 内部的资源单位，实现资源隔离（一个 TM 可以有多个 Slot，每个 Slot 平分 TM 的托管内存（Managed Memory），Flink 1.18 中，Slot 可以根据作业的具体需求动态申请不同的 CPU 和内存规格，而非均分。）和并发控制（Slot 的数量决定了该 TM 能够同时执行的 Subtask 的数量）。</li>
+<li><strong>Network Stack</strong>：基于 Netty 实现数据的序列化、反序列化和跨 TM 传输，核心组件是 ResultPartition（上游 Task 产出数据的缓冲区） 和 InputGate（下游 Task 接收数据的入口），是 Shuffle 操作的底层实现。通过 Credit-based Flow Control 实现精细化的流量控制，防止下游过载引发的反压，通过 Zero-Copy 减少内存拷贝，提高大吞吐量场景下的传输效率。 </li>
+<li><strong>Memory Manager</strong>：管理 TM 的内存。为了避免 JVM GC 导致的停顿，Flink 的内存模型分为 Framework Heap&#x2F;Off-heap（Flink 框架自身使用的内存）、Task Heap&#x2F;Off-heap（用户算子使用的内存）、Managed Memory（专用于 RocksDB&#x2F;ForSt 状态后端、批处理排序和缓存）、Network Memory（用于网络传输的缓冲区）。</li>
+<li><strong>IO Manager</strong>：负责磁盘操作，包括溢写（当内存不足时，将中间结果写到磁盘）和状态本地缓存（在存算分离架构下，负责管理本地磁盘上的状态缓存）。</li>
+<li><strong>Library Cache Manager</strong>：负责为每个作业下载并缓存所需的 Jar 包，利用 UserCodeClassLoader 确保不同作业之间的类库不冲突。</li>
+<li><strong>Broadcast Variable Manager</strong>：专门管理广播流或数据集，确保同一节点上的不同 Task 可以高效共享同一份广播数据，无需每个 Task 单独存一份，节约内存。</li>
+</ol>
+<blockquote>
+<p><strong>Job 和 Task 的区别</strong>：</p>
+<ul>
+<li><strong>Job</strong>是一个完整的、独立的 Flink 数据处理程序，包含整个数据处理流水线（<code>Source</code> → <code>Transformations</code> → <code>Sink</code>），生命周期从用户执行 <code>execute</code> 方法开始，到所有 Task 成功完成或失败&#x2F;取消结束。</li>
+<li><strong>Task 是 Job 分解后的最小执行单元</strong>，是 JobGraph 中一个算子链的并行实例，代表一个具体的、在 Slot 中运行的线程**，执行特定算子链的计算逻辑，生命周期从被 JobManager 调度到 TaskManager 的 Slot 上启动开始，到其负责的计算处理完毕（或失败）结束。**一个 Job 可以包含多个 Task。</li>
+</ul>
+</blockquote>
+<h2 id="四、算子链优化"><a href="#四、算子链优化" class="headerlink" title="四、算子链优化"></a>四、算子链优化</h2><p>在满足以下<strong>所有</strong>条件时自动触发，<strong>将多个算子的 Subtask 合并成一个 Task（算子链）执行</strong>，能够<strong>减少线程间的切换、缓冲的开销，并且在减少延迟的同时增加整体吞吐量</strong>。</p>
+<ol>
+<li>相邻算子</li>
+<li>相同并行度</li>
+<li>Forward 数据传输模式：<strong>最关键的条件</strong>。上游算子产生的数据必须能够以 Forward 的方式传输给下游算子，即<ul>
+<li>点对点、一对一传输：上游算子的每个 Subtask 产生的输出数据，必须只发送给下游算子的一个特定的 Subtask。</li>
+<li>无重分区：数据传输不需要根据 key（如 <code>keyBy()</code>）、 Round-Robin（如 <code>rebalance()</code>）或 Broadcast 等规则进行重新分发。数据的分区在上下游 Subtask 之间的对应关系是固定的。</li>
+</ul>
+</li>
+</ol>
+<div align=center><img    
+                       lazyload
+                       alt="image"
+                       data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260402224249729.png"
+                         style="zoom: 25%;" 
+                 ></div>
+
+<h2 id="五、Task-Slot-和资源"><a href="#五、Task-Slot-和资源" class="headerlink" title="五、Task Slot 和资源"></a>五、Task Slot 和资源</h2><p>每个 TaskManager（Worker）都是一个 JVM 进程，可以在单独的线程中执行一个或多个 Subtask（多个 Subtask 在同一个线程内顺序执行）。Task Slot（至少一个）用于<strong>控制一个 TaskManager 中并行执行的 Task 的数量</strong>。 每个 Task Slot 代表 TaskManager 中资源的固定子集，使得各个 Task 之间不会竞争托管内存。</p>
+<div align=center><img    
+                       lazyload
+                       alt="image"
+                       data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260402225917951.png"
+                         style="zoom: 25%;" 
+                 ></div>
+
+<p>默认情况下，Flink <strong>允许 Subtask 共享 Slot</strong>，<strong>仅要求来自于同一个作业</strong>，不要求必须是同一个 Task，所以一个 Slot 可以持有整个作业管道。具有以下<strong>优点</strong></p>
+<ol>
+<li>Flink 集群<strong>所需的 Task Slot 数量和作业中的最大并行度（所有算子的并行度的最大值）恰好相同</strong>，无需计算程序总共包含多少个 Task，即<strong>同一个 Task 的不同 Subtask 必须放在不同的 Slot 中，而不同 Task 的 Subtask 可以放在同一个 Slot 中</strong>。</li>
+<li>更好地利用资源。如果没有 Slot 共享，非密集 Subtask 将阻塞和密集型 Subtask 同样多的资源。</li>
+</ol>
+<div align=center><img    
+                       lazyload
+                       alt="image"
+                       data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260402225907647.png"
+                         style="zoom:25%;" 
+                 ></div>
+
+<blockquote>
+<p>补充：</p>
+<ul>
+<li><strong>非密集型 Subtask</strong> 是指<strong>低 CPU&#x2F;内存消耗</strong>，仅做简单转换或数据转发，典型算子包括 <code>Source</code>、<code>Map</code>、<code>Filter</code>。</li>
+<li><strong>密集型 Subtask</strong> 是指<strong>高 CPU&#x2F;内存消耗</strong>，需要处理复杂计算或维护大量状态，典型算子包括 <code>Window</code>、<code>Aggregate</code>、<code>Join</code>。</li>
+<li>Flink <strong>资源隔离的单位是 Task Slot</strong>，每个 Slot 被分配固定大小的资源，<strong>当禁用 Slot 共享时，每个 Subtask 独占一个 Slot，Slot 资源按最重量级算子配置</strong>。</li>
+</ul>
+</blockquote>
+<h2 id="六、Flink-的部署模式"><a href="#六、Flink-的部署模式" class="headerlink" title="六、Flink 的部署模式"></a>六、Flink 的部署模式</h2><p>在 Flink 的分布式架构中，部署模式决定了集群的生命周期、资源隔离程度以及 <code>main</code> 方法在何处执行。</p>
+<ol>
+<li><p>会话模式（Session Mode）：这是最基础的多租户模式。集群提前启动并长期运行，多个作业共享同一个 JobManager 和资源池。</p>
+</li>
+<li><p>单作业模式（Per-Job Mode）：每个任务独享 JobManager 和 TaskManager，资源充分隔离。JobManager 的生命周期和作业的生命周期绑定。</p>
+<blockquote>
+<p>注：该模式在 Flink 1.15 之后已标记为废弃</p>
+</blockquote>
+</li>
+<li><p>应用模式（Application Mode）：目前 Flink 官方最推荐的部署方式，旨在解决 Per-Job 模式中“客户端负载过重”的问题。</p>
+</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th align="center">模式</th>
+<th align="center">工作机制</th>
+<th align="center">优点</th>
+<th align="center">缺点</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">会话模式</td>
+<td align="center">预先启动一个固定资源的集群（JobManager 和多个 TaskManager），客户端多次提交作业，所有作业在集群中竞争 Slot</td>
+<td align="center">启动快（不需要为每个作业重新申请资源和启动进程）、适合小任务</td>
+<td align="center">隔离性差（一个作业挂了可能影响集群的其他作业）、资源竞争</td>
+</tr>
+<tr>
+<td align="center">单作业模式</td>
+<td align="center">客户端提交作业时，向资源调度器（如 Yarn）申请一套全新的 JobManager 和 TaskManager，作业执行完毕后立即释放资源</td>
+<td align="center">强隔离（每个作业有独立的资源，互不干扰）</td>
+<td align="center">启动慢（每次都要经历资源申请、进程启动的过程）、客户端压力大（客户端需要解析 JobGraph 并将其发送给 JobManager，消耗客户端大量的 CPU 和带宽）</td>
+</tr>
+<tr>
+<td align="center">应用模式</td>
+<td align="center">客户端不再本地生成 JobGraph，<code>main()</code> 方法在 JobManager 中执行，JobManager 自行解析图并向 ResourceManager 申请资源</td>
+<td align="center">减轻客户端负担、资源利用率高、隔离性好</td>
+<td align="center">仅支持 Yarn 和 Kubernetes</td>
+</tr>
+</tbody></table>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文梳理了 Flink 的架构，包括 Client 的作用、JobManager 的作用与组成部分、TaskManager 的作用与组成部分、算子链优化的作用和条件、Task Slot 的作用与共享 Slot 的优点、Flink 的三种部署模式的工作机制与优缺点。</p>
+
+                    
+                </div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Flink/">Flink</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                            <div class="prev-post">
+                                <a class="prev"
+                                   rel="prev"
+                                   href="/2026/04/09/Flink-%E5%A6%82%E4%BD%95%E8%AF%BB%E5%8F%96-flink-conf-yaml-%E5%B9%B6%E5%B0%86%E5%85%B6%E8%BD%AC%E6%8D%A2%E4%B8%BA%E5%85%A8%E5%B1%80%E5%8F%AF%E7%94%A8%E7%9A%84-Configuration-%E5%AF%B9%E8%B1%A1%EF%BC%9F/"
+                                   title="Flink 如何读取 flink-conf.yaml 并将其转换为全局可用的 Configuration 对象？"
+                                >
+                                    <span class="left arrow-icon flex-center">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </span>
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Flink 如何读取 flink-conf.yaml 并将其转换为全局可用的 Configuration 对象？</span>
+                                        <span class="post-nav-item">上一篇</span>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/2025/11/04/Java-%E7%89%B9%E6%80%A7%EF%BC%9A-Lambda-%E8%A1%A8%E8%BE%BE%E5%BC%8F/"
+                                   title="Java 特性：Lambda 表达式"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Java 特性：Lambda 表达式</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81Client"><span class="nav-text">一、Client</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81JobManager"><span class="nav-text">二、JobManager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81TaskManager"><span class="nav-text">三、TaskManager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E7%AE%97%E5%AD%90%E9%93%BE%E4%BC%98%E5%8C%96"><span class="nav-text">四、算子链优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81Task-Slot-%E5%92%8C%E8%B5%84%E6%BA%90"><span class="nav-text">五、Task Slot 和资源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81Flink-%E7%9A%84%E9%83%A8%E7%BD%B2%E6%A8%A1%E5%BC%8F"><span class="nav-text">六、Flink 的部署模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2025</span>&nbsp;-&nbsp;2026
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">Shen Huanglin</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81Client"><span class="nav-text">一、Client</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81JobManager"><span class="nav-text">二、JobManager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81TaskManager"><span class="nav-text">三、TaskManager</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81%E7%AE%97%E5%AD%90%E9%93%BE%E4%BC%98%E5%8C%96"><span class="nav-text">四、算子链优化</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81Task-Slot-%E5%92%8C%E8%B5%84%E6%BA%90"><span class="nav-text">五、Task Slot 和资源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%AD%E3%80%81Flink-%E7%9A%84%E9%83%A8%E7%BD%B2%E6%A8%A1%E5%BC%8F"><span class="nav-text">六、Flink 的部署模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+
+<!-- lazyload -->
+
+    
+<script src="/js/lazyload.js"></script>
+
+
+
+<div class="">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+
+
+</body>
+</html>
