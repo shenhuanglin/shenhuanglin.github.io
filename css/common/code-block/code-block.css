@@ -101,15 +101,6 @@ figure.highlight {
   position: relative;
   box-sizing: border-box;
   overflow-y: hidden;
-  overflow-x: hidden;
-}
-figure.highlight .code pre {
-  white-space: pre-wrap !important;
-  word-break: break-all !important;
-  word-wrap: break-word !important;
-}
-figure.highlight .gutter pre {
-  white-space: pre-wrap !important;
 }
 figure.highlight .shrink-line {
   position: absolute;

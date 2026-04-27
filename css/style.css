@@ -1728,19 +1728,10 @@ figure.highlight {
   position: relative;
   box-sizing: border-box;
   overflow-y: hidden;
-  overflow-x: hidden;
   transition-delay: 0s, 0s, 0s, 0s, 0s;
   transition-timing-function: ease, ease, ease, ease, linear;
   transition-duration: 0.2s, 0.2s, 0.2s, 0.2s, 0.2s;
   transition-property: color, background, box-shadow, border-color, height;
-}
-figure.highlight .code pre {
-  white-space: pre-wrap !important;
-  word-break: break-all !important;
-  word-wrap: break-word !important;
-}
-figure.highlight .gutter pre {
-  white-space: pre-wrap !important;
 }
 figure.highlight .shrink-line {
   position: absolute;
