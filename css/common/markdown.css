@@ -292,7 +292,7 @@ keep-mobile()
 }
 .keep-markdown-body h3,
 .keep-markdown-body > .post h3 {
-  font-weight: 550;
+  font-weight: 600;
   font-size: 1.5rem;
 keep-tablet()
 keep-mobile()
@@ -305,7 +305,7 @@ keep-mobile()
 }
 .keep-markdown-body h4,
 .keep-markdown-body > .post h4 {
-  font-weight: 550;
+  font-weight: 600;
   font-size: 1.4rem;
 keep-tablet()
 keep-mobile()
@@ -318,7 +318,7 @@ keep-mobile()
 }
 .keep-markdown-body h5,
 .keep-markdown-body > .post h5 {
-  font-weight: 500;
+  font-weight: 600;
   font-size: 1.3rem;
 keep-tablet()
 keep-mobile()
@@ -331,7 +331,7 @@ keep-mobile()
 }
 .keep-markdown-body h6,
 .keep-markdown-body > .post h6 {
-  font-weight: 500;
+  font-weight: 600;
   font-size: 1.2rem;
 keep-tablet()
 keep-mobile()
