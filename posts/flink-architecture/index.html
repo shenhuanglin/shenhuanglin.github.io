@@ -191,7 +191,7 @@
             
                 <span class="meta-info-item post-update-date" style="display: none;" >
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Thu Apr 23 2026 12:38:48 GMT+0800">2026 年 04 月 23 日</span>
+                    <span class="datetime" data-updated="Sun May 03 2026 16:09:08 GMT+0800">2026 年 05 月 03 日</span>
                 </span>
             
         
@@ -266,7 +266,7 @@
 </li>
 </ol>
 <p>至少有一个 JobManager，高可用（HA）设置中有多个 JobManager，其中一个始终是 Leader，其他的是 Standby（备用实例）。</p>
-<h2 id="三、TaskManager"><a href="#三、TaskManager" class="headerlink" title="三、TaskManager"></a>三、TaskManager</h2><p>TaskManager 也称为 Worker，<strong>负责实际执行计算任务并管理本地资源</strong>。TaskManager 运行着 Flink 作业分解后产生的 Task（任务），<strong>一个 Task 是 JobGraph 中一个算子链的并行实例</strong>。至少有一个 TaskManager，其资源调度的最小单位是 Task Slot，<strong>Task Slot 的数量表示并发处理的 Task 的数量</strong>。TaskManager 由以下几个部分组成</p>
+<h2 id="三、TaskManager"><a href="#三、TaskManager" class="headerlink" title="三、TaskManager"></a>三、TaskManager</h2><p>TaskManager 也称为 Worker，<strong>负责实际执行计算任务并管理本地资源</strong>。TaskManager 运行着 Flink 作业分解后产生的 Task（任务），<strong>一个 Task 是 JobGraph 中一个算子链的并行实例</strong>。至少有一个 TaskManager，其资源调度的最小单位是 Task Slot，<strong>Task Slot 的数量表示该 TaskManager 能够并发（Slot 只隔离内存，不隔离 CPU，因此 TM 内的多个 Task 线程共享 CPU，互相竞争）处理的 Task 的数量</strong>。TaskManager 由以下几个部分组成</p>
 <div align=center><img    
                        lazyload
                        alt="image"
@@ -275,8 +275,8 @@
                  ></div>
 
 <ol>
-<li><strong>TaskExecutor</strong>：TaskManager 进程的入口，负责任务生命周期管理（接收来自 JobMaster 的部署请求，启动、停止、取消 Task）、状态汇报（维护任务的运行状态并定期向 JobMaster 汇报）和心跳机制（与 ResourceManager 和 JobMaster 保持心跳）。</li>
-<li><strong>Task Slot</strong>：TM 内部的资源单位，实现资源隔离（一个 TM 可以有多个 Slot，每个 Slot 平分 TM 的托管内存（Managed Memory），Flink 1.18 中，Slot 可以根据作业的具体需求动态申请不同的 CPU 和内存规格，而非均分。）和并发控制（Slot 的数量决定了该 TM 能够同时执行的 Subtask 的数量）。</li>
+<li><strong>TaskExecutor</strong>：TaskManager 的核心实现类，负责任务生命周期管理（接收来自 JobMaster 的部署请求，启动、停止、取消 Task）、状态汇报（维护任务的运行状态并定期向 JobMaster 汇报）和心跳机制（与 ResourceManager 和 JobMaster 保持心跳）。</li>
+<li><strong>Task Slot</strong>：TM 内部的资源单位，实现资源隔离（一个 TM 可以有多个 Slot，每个 Slot 平分 TM 的托管内存（Managed Memory），Flink 1.18 中，Slot 可以根据作业的具体需求动态申请不同的 CPU 和内存规格，而非均分）和并发控制。</li>
 <li><strong>Network Stack</strong>：基于 Netty 实现数据的序列化、反序列化和跨 TM 传输，核心组件是 ResultPartition（上游 Task 产出数据的缓冲区） 和 InputGate（下游 Task 接收数据的入口），是 Shuffle 操作的底层实现。通过 Credit-based Flow Control 实现精细化的流量控制，防止下游过载引发的反压，通过 Zero-Copy 减少内存拷贝，提高大吞吐量场景下的传输效率。 </li>
 <li><strong>Memory Manager</strong>：管理 TM 的内存。为了避免 JVM GC 导致的停顿，Flink 的内存模型分为 Framework Heap&#x2F;Off-heap（Flink 框架自身使用的内存）、Task Heap&#x2F;Off-heap（用户算子使用的内存）、Managed Memory（专用于 RocksDB&#x2F;ForSt 状态后端、批处理排序和缓存）、Network Memory（用于网络传输的缓冲区）。</li>
 <li><strong>IO Manager</strong>：负责磁盘操作，包括溢写（当内存不足时，将中间结果写到磁盘）和状态本地缓存（在存算分离架构下，负责管理本地磁盘上的状态缓存）。</li>
@@ -287,7 +287,7 @@
 <p><strong>Job 和 Task 的区别</strong>：</p>
 <ul>
 <li><strong>Job</strong>是一个完整的、独立的 Flink 数据处理程序，包含整个数据处理流水线（<code>Source</code> → <code>Transformations</code> → <code>Sink</code>），生命周期从用户执行 <code>execute</code> 方法开始，到所有 Task 成功完成或失败&#x2F;取消结束。</li>
-<li><strong>Task 是 Job 分解后的最小执行单元</strong>，是 JobGraph 中一个算子链的并行实例，代表一个具体的、在 Slot 中运行的线程**，执行特定算子链的计算逻辑，生命周期从被 JobManager 调度到 TaskManager 的 Slot 上启动开始，到其负责的计算处理完毕（或失败）结束。**一个 Job 可以包含多个 Task。</li>
+<li><strong>Task 是 Job 分解后的最小执行单元</strong>，是 JobGraph 中一个算子链的并行实例，代表一个具体的、在 Slot 中运行的线程，执行特定算子链的计算逻辑，生命周期从被 JobManager 调度到 TaskManager 的 Slot 上启动开始，到其负责的计算处理完毕（或失败）结束。一个 Job 可以包含多个 Task。</li>
 </ul>
 </blockquote>
 <h2 id="四、算子链优化"><a href="#四、算子链优化" class="headerlink" title="四、算子链优化"></a>四、算子链优化</h2><p>在满足以下<strong>所有</strong>条件时自动触发，<strong>将多个算子的 Subtask 合并成一个 Task（算子链）执行</strong>，能够<strong>减少线程间的切换、缓冲的开销，并且在减少延迟的同时增加整体吞吐量</strong>。</p>
@@ -307,7 +307,7 @@
                          style="zoom: 25%;" 
                  ></div>
 
-<h2 id="五、Task-Slot-和资源"><a href="#五、Task-Slot-和资源" class="headerlink" title="五、Task Slot 和资源"></a>五、Task Slot 和资源</h2><p>每个 TaskManager（Worker）都是一个 JVM 进程，可以在单独的线程中执行一个或多个 Subtask（多个 Subtask 在同一个线程内顺序执行）。Task Slot（至少一个）用于<strong>控制一个 TaskManager 中并行执行的 Task 的数量</strong>。 每个 Task Slot 代表 TaskManager 中资源的固定子集，使得各个 Task 之间不会竞争托管内存。</p>
+<h2 id="五、Task-Slot-和资源"><a href="#五、Task-Slot-和资源" class="headerlink" title="五、Task Slot 和资源"></a>五、Task Slot 和资源</h2><p>每个 TaskManager（Worker）都是一个 JVM 进程，可以在单独的线程中执行一个或多个 Subtask（多个 Subtask 在同一个线程内顺序执行）。Task Slot（至少一个）用于<strong>控制一个 TaskManager 中能够并发执行的 Task 的数量</strong>。 每个 Task Slot 代表 TaskManager 中资源的固定子集，使得各个 Task 之间不会竞争托管内存。</p>
 <div align=center><img    
                        lazyload
                        alt="image"
@@ -317,7 +317,7 @@
 
 <p>默认情况下，Flink <strong>允许 Subtask 共享 Slot</strong>，<strong>仅要求来自于同一个作业</strong>，不要求必须是同一个 Task，所以一个 Slot 可以持有整个作业管道。具有以下<strong>优点</strong></p>
 <ol>
-<li>Flink 集群<strong>所需的 Task Slot 数量和作业中的最大并行度（所有算子的并行度的最大值）恰好相同</strong>，无需计算程序总共包含多少个 Task，即<strong>同一个 Task 的不同 Subtask 必须放在不同的 Slot 中，而不同 Task 的 Subtask 可以放在同一个 Slot 中</strong>。</li>
+<li>一个 Job 所需的 Task Slot 数量和作业中的最大并行度（所有算子的并行度的最大值）恰好相同**，无需计算程序总共包含多少个 Task，即<strong>同一个 Task 的不同 Subtask 必须放在不同的 Slot 中，而不同 Task 的 Subtask 可以放在同一个 Slot 中</strong>。</li>
 <li>更好地利用资源。如果没有 Slot 共享，非密集 Subtask 将阻塞和密集型 Subtask 同样多的资源。</li>
 </ol>
 <div align=center><img    

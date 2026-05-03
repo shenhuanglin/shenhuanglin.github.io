@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="Hexo Theme Keep">
+    <meta name="author" content="Shen Huanglin">
+    
+    <title>
+        
+            Flink 集群启动的过程 |
+        
+        Go For It !
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/favicon.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"shenhuanglin.github.io","root":"/","language":"zh-CN"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#757485","title":"Go For It !","author":"Shen Huanglin","avatar":"/images/touxiang.jpg","favicon":"/images/favicon.png"},"menu":{"home":"/","archives":"/archives"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"Keep writing and Keep loving.","hitokoto":true},"social_contact":{"enable":false,"links":{"github":null,"weixin":null,"qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":true,"hide_header":true},"home":{"announcement":null,"category":true,"tag":false,"post_datetime":"created"},"post":{"author_badge":{"enable":false,"level_badge":false,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":false,"min2read":false},"datetime_format":"YYYY 年 MM 月 DD 日","copyright_info":false,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null}},"code_block":{"tools":{"enable":true,"style":"mac"},"highlight_theme":"default"},"toc":{"enable":true,"number":false,"expand_all":false,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":false,"site_uv":false,"site_pv":true,"page_pv":true}},"local_search":{"enable":false,"preload":false},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":true},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":false},"footer":{"since":2025,"word_count":false,"site_deploy":{"enable":false,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+            <a class="site-name border-box" href="/">
+               Go For It !
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        Flink 集群启动的过程
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/touxiang.jpg">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">Shen Huanglin</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2026 年 05 月 03 日</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date" style="display: none;" >
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Sun May 03 2026 23:06:38 GMT+0800">2026 年 05 月 03 日</span>
+                </span>
+            
+        
+
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Flink/">Flink</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+        
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h2 id="一、EntryPoint"><a href="#一、EntryPoint" class="headerlink" title="一、EntryPoint"></a>一、EntryPoint</h2><p>在 Flink 架构中，<code>EntryPoint</code> 是进程启动的起点，而在操作系统层面，<code>EntryPoint</code> 是由外部脚本拉起的。</p>
+<p>在 Standalone 模式下，集群启动的脚本是 <code>flink-dist/src/main/flink-bin/bin/start-cluster.sh</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取当前脚本所在的目录路径</span></span><br><span class="line">bin=`dirname &quot;$0&quot;`</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">进入目录后输出绝对路径并赋值</span></span><br><span class="line">bin=`cd &quot;$bin&quot;; pwd`</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">. 等价于 <span class="built_in">source</span>，表示在当前 shell 进程中执行 config.sh 脚本，加载配置文件中的环境变量和函数定义</span></span><br><span class="line">. &quot;$bin&quot;/config.sh</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">开启大小写不敏感匹配模式，允许在 [[ ]] 中的字符串比较忽略大小写差异</span></span><br><span class="line">shopt -s nocasematch</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">启动 JobManager 实例，分为高可用模式和 Standalone 模式，通过执行 jobmanager.sh 脚本实现</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">判断是否是高可用模式</span></span><br><span class="line">if [[ $HIGH_AVAILABILITY == &quot;zookeeper&quot; ]]; then</span><br><span class="line">    # 执行配置文件中的 readMasters 函数，它读取 conf/masters 文件中的主机列表，并将其存储在 MASTERS 数组中，</span><br><span class="line">    # 同时将对应的 Web UI 端口存储在 WEBUIPORTS 数组中，如果端口未指定，默认填 0，并检查所有 master 是否配置</span><br><span class="line">    # 为 localhost，结果存入 MASTERS_ALL_LOCALHOST 变量中（布尔值）</span><br><span class="line">    readMasters</span><br><span class="line">    # 打印集群中 master 节点的数量</span><br><span class="line">    echo &quot;Starting HA cluster with $&#123;#MASTERS[@]&#125; masters.&quot;</span><br><span class="line"></span><br><span class="line">    for ((i=0;i&lt;$&#123;#MASTERS[@]&#125;;++i)); do</span><br><span class="line">        master=$&#123;MASTERS[i]&#125;</span><br><span class="line">        webuiport=$&#123;WEBUIPORTS[i]&#125;</span><br><span class="line">        # 如果所有 master 都配置为 localhost，则直接在本地调用 jobmanager.sh 脚本启动 JobManager 实例，否则</span><br><span class="line">        # 通过 ssh 连接到远程主机并在后台启动 JobManager 实例</span><br><span class="line">        if [ $&#123;MASTERS_ALL_LOCALHOST&#125; = true ] ; then</span><br><span class="line">            &quot;$&#123;FLINK_BIN_DIR&#125;&quot;/jobmanager.sh start &quot;$&#123;master&#125;&quot; &quot;$&#123;webuiport&#125;&quot;</span><br><span class="line">        else</span><br><span class="line">            ssh -n $FLINK_SSH_OPTS $master -- &quot;nohup /bin/bash -l \&quot;$&#123;FLINK_BIN_DIR&#125;/jobmanager.sh\&quot; start $&#123;master&#125; $&#123;webuiport&#125; &amp;&quot;</span><br><span class="line">        fi</span><br><span class="line">    done</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">非高可用模式，即单 JobManager 模式</span></span><br><span class="line">else</span><br><span class="line">    echo &quot;Starting cluster.&quot;</span><br><span class="line"></span><br><span class="line">    # 在本机直接启动单个 JobManager，不传递主机和端口参数，使用默认配置</span><br><span class="line">    &quot;$FLINK_BIN_DIR&quot;/jobmanager.sh start</span><br><span class="line">fi</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">关闭大小写不敏感匹配模式，恢复默认的字符串比较行为</span></span><br><span class="line">shopt -u nocasematch</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">调用配置文件中的 TMWorkers 函数，传入参数 start，它会调用 readWorkers 读取 conf/workers 文件中的 worker</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">节点列表，将每行的主机名存储在 WORKERS 数组中，并判断是否全为本地主机，结果存储在 WORKERS_ALL_LOCALHOST 变量中。</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">然后根据 WORKERS_ALL_LOCALHOST 的值，决定是在本地调用 taskmanager.sh 脚本启动 TaskManager 实例还是通过 ssh</span> </span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">连接到远程主机启动 TaskManager 实例。每个 worker 都会启动一个独立的 TaskManager 进程</span></span><br><span class="line">TMWorkers start</span><br></pre></td></tr></table></figure>
+
+<p>其中调用了如下 <code>jobmanager.sh</code> 脚本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">用于启动或停止一个 JobManager 实例</span></span><br><span class="line">USAGE=&quot;Usage: jobmanager.sh ((start|start-foreground) [args])|stop|stop-all&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">第一个参数，取值可以是 start、start-foreground、stop 或 stop-all，分别表示以后台守护进程方式启动 JM、</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">以当前控制台应用方式启动 JM、停止当前 JM 实例和停止所有 JM 实例</span></span><br><span class="line">STARTSTOP=$1</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果第二个参数为空或者第二个参数以 -D 开头（动态参数），则说明没有指定主机和端口参数，直接将后续参数收入 args 数组</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">作为 JVM 参数传递给 JM 实例</span></span><br><span class="line">if [ -z $2 ] || [[ $2 == &quot;-D&quot; ]]; then</span><br><span class="line">    # start [-D ...]</span><br><span class="line">    args=(&quot;$&#123;@:2&#125;&quot;)</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果第三个参数为空或者第三个参数以 -D 开头，则说明指定了主机参数但没有指定端口参数，将第二个参数作为主机参数，</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">后续参数收入 args 数组</span></span><br><span class="line">elif [ -z $3 ] || [[ $3 == &quot;-D&quot; ]]; then</span><br><span class="line">    # legacy path: start &lt;host&gt; [-D ...]</span><br><span class="line">    HOST=$2</span><br><span class="line">    args=(&quot;$&#123;@:3&#125;&quot;)</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">否则就是同时传了主机和端口参数，将第二个参数作为主机参数，第三个参数作为端口参数，后续参数收入 args 数组</span></span><br><span class="line">else</span><br><span class="line">    # legacy path: start &lt;host&gt; &lt;port&gt; [-D ...]</span><br><span class="line">    HOST=$2</span><br><span class="line">    WEBUIPORT=$3</span><br><span class="line">    args=(&quot;$&#123;@:4&#125;&quot;)</span><br><span class="line">fi</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检验参数，如果第一个参数不是合法值，则输出使用说明并退出</span></span><br><span class="line">if [[ $STARTSTOP != &quot;start&quot; ]] &amp;&amp; [[ $STARTSTOP != &quot;start-foreground&quot; ]] &amp;&amp; [[ $STARTSTOP != &quot;stop&quot; ]] &amp;&amp; [[ $STARTSTOP != &quot;stop-all&quot; ]]; then</span><br><span class="line">  echo $USAGE</span><br><span class="line">  exit 1</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">bin=`dirname &quot;$0&quot;`</span><br><span class="line">bin=`cd &quot;$bin&quot;; pwd`</span><br><span class="line"></span><br><span class="line">. &quot;$bin&quot;/config.sh</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置入口点</span></span><br><span class="line">ENTRYPOINT=standalonesession</span><br><span class="line"></span><br><span class="line">if [[ $STARTSTOP == &quot;start&quot; ]] || [[ $STARTSTOP == &quot;start-foreground&quot; ]]; then</span><br><span class="line">    # 将 JM 特定的 JVM 参数追加到通用 JVM 参数后面并 export 使子进程可见</span><br><span class="line">    export FLINK_ENV_JAVA_OPTS=&quot;$&#123;FLINK_ENV_JAVA_OPTS&#125; $&#123;FLINK_ENV_JAVA_OPTS_JM&#125;&quot;</span><br><span class="line">    # 计算 JM 的内存参数并追加到 DYNAMIC_PARAMETERS 变量中，在后续传递给 JM 实例的命令行参数中使用</span><br><span class="line">    parseJmArgsAndExportLogs &quot;$&#123;args[@]&#125;&quot;</span><br><span class="line">    # 设置日志相关参数</span><br><span class="line">    args=(&quot;--configDir&quot; &quot;$&#123;FLINK_CONF_DIR&#125;&quot; &quot;--executionMode&quot; &quot;cluster&quot; &quot;$&#123;args[@]&#125;&quot;)</span><br><span class="line">    # 若 --host 参数非空，则将其和对应的值追加到 args 数组中</span><br><span class="line">    if [ ! -z $HOST ]; then</span><br><span class="line">        args+=(&quot;--host&quot;)</span><br><span class="line">        args+=(&quot;$&#123;HOST&#125;&quot;)</span><br><span class="line">    fi</span><br><span class="line">    # 如果--webui-port 参数非空，则将其和对应的值追加到 args 数组中</span><br><span class="line">    if [ ! -z $WEBUIPORT ]; then</span><br><span class="line">        args+=(&quot;--webui-port&quot;)</span><br><span class="line">        args+=(&quot;$&#123;WEBUIPORT&#125;&quot;)</span><br><span class="line">    fi</span><br><span class="line">    # 如果 DYNAMIC_PARAMETERS 变量非空，则将其中的参数追加到 args 数组的头部，确保动态参数优先于其他参数</span><br><span class="line">    if [ ! -z &quot;$&#123;DYNAMIC_PARAMETERS&#125;&quot; ]; then</span><br><span class="line">        args=($&#123;DYNAMIC_PARAMETERS[@]&#125; &quot;$&#123;args[@]&#125;&quot;)</span><br><span class="line">    fi</span><br><span class="line">fi</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果使用前台控制台应用方式启动 JM，用 <span class="built_in">exec</span> 替换当前 shell 进程，调用 flink-console.sh 脚本启动 JM 实例（日志</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">直接输出在终端，常用于调试），<span class="built_in">exec</span> 不创建子进程，而是直接在当前进程中执行命令，命令执行完成后当前进程结束</span></span><br><span class="line">if [[ $STARTSTOP == &quot;start-foreground&quot; ]]; then</span><br><span class="line">    exec &quot;$&#123;FLINK_BIN_DIR&#125;&quot;/flink-console.sh $ENTRYPOINT &quot;$&#123;args[@]&#125;&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">其余指令均采用后台守护进程方式启动或停止 JM 实例，调用 flink-daemon.sh 脚本，它会在后台启动一个新的 JVM 进程来</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">运行 JM 实例，并将日志输出到指定的日志文件中</span></span><br><span class="line">else</span><br><span class="line">    &quot;$&#123;FLINK_BIN_DIR&#125;&quot;/flink-daemon.sh $STARTSTOP $ENTRYPOINT &quot;$&#123;args[@]&#125;&quot;</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<p>和如下 <code>taskmanager.sh</code> 脚本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">用于启动或停止一个 TaskManager 实例</span></span><br><span class="line">USAGE=&quot;Usage: taskmanager.sh (start|start-foreground|stop|stop-all)&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取调用脚本时传入的操作命令参数</span></span><br><span class="line">STARTSTOP=$1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将第二个参数开始的所有参数收入 ARGS 数组，作为 JVM 参数传递给 TM 实例</span></span><br><span class="line">ARGS=(&quot;$&#123;@:2&#125;&quot;)</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">参数校验</span></span><br><span class="line">if [[ $STARTSTOP != &quot;start&quot; ]] &amp;&amp; [[ $STARTSTOP != &quot;start-foreground&quot; ]] &amp;&amp; [[ $STARTSTOP != &quot;stop&quot; ]] &amp;&amp; [[ $STARTSTOP != &quot;stop-all&quot; ]]; then</span><br><span class="line">  echo $USAGE</span><br><span class="line">  exit 1</span><br><span class="line">fi</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取绝对路径并加载配置</span></span><br><span class="line">bin=`dirname &quot;$0&quot;`</span><br><span class="line">bin=`cd &quot;$bin&quot;; pwd`</span><br><span class="line"></span><br><span class="line">. &quot;$bin&quot;/config.sh</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置入口点，flink-daemon.sh 会将其映射到 Java 主类 TaskManagerRunner</span></span><br><span class="line">ENTRYPOINT=taskexecutor</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">构建启动参数</span></span><br><span class="line">if [[ $STARTSTOP == &quot;start&quot; ]] || [[ $STARTSTOP == &quot;start-foreground&quot; ]]; then</span><br><span class="line"></span><br><span class="line">    # 如果用户既没有设置通用 JVM 参数 FLINK_ENV_JAVA_OPTS，也没有设置 TM 特定的 JVM 参数</span><br><span class="line">    # FLINK_ENV_JAVA_OPTS_TM，则默认启用 G1 垃圾回收器，这是 TM 性能优化的默认值，提供更</span><br><span class="line">    # 好的性能和更低的停顿时间</span><br><span class="line">    if [ -z &quot;$&#123;FLINK_ENV_JAVA_OPTS&#125;&quot; ] &amp;&amp; [ -z &quot;$&#123;FLINK_ENV_JAVA_OPTS_TM&#125;&quot; ]; then</span><br><span class="line">        export JVM_ARGS=&quot;$JVM_ARGS -XX:+UseG1GC&quot;</span><br><span class="line">    fi</span><br><span class="line"></span><br><span class="line">    # 将 TM 特定的 JVM 参数追加到通用 JVM 参数后面</span><br><span class="line">    export FLINK_ENV_JAVA_OPTS=&quot;$&#123;FLINK_ENV_JAVA_OPTS&#125; $&#123;FLINK_ENV_JAVA_OPTS_TM&#125;&quot;</span><br><span class="line">    # 计算 TM 的内存参数并追加到 DYNAMIC_PARAMETERS 变量中</span><br><span class="line">    parseTmArgsAndExportLogs &quot;$&#123;ARGS[@]&#125;&quot;</span><br><span class="line">    # 将内存动态参数前置到 ARGS 数组头部，确保它们在命令行参数中优先传递给 TM 实例</span><br><span class="line">    if [ ! -z &quot;$&#123;DYNAMIC_PARAMETERS&#125;&quot; ]; then</span><br><span class="line">        ARGS=($&#123;DYNAMIC_PARAMETERS[@]&#125; &quot;$&#123;ARGS[@]&#125;&quot;)</span><br><span class="line">    fi</span><br><span class="line">    # 添加配置文件目录</span><br><span class="line">    ARGS=(&quot;--configDir&quot; &quot;$&#123;FLINK_CONF_DIR&#125;&quot; &quot;$&#123;ARGS[@]&#125;&quot;)</span><br><span class="line">fi</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">前台运行</span></span><br><span class="line">if [[ $STARTSTOP == &quot;start-foreground&quot; ]]; then</span><br><span class="line">    exec &quot;$&#123;FLINK_BIN_DIR&#125;&quot;/flink-console.sh $ENTRYPOINT &quot;$&#123;ARGS[@]&#125;&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">后台启动 TM 实例</span></span><br><span class="line">else</span><br><span class="line">    # 如果 FLINK_TM_COMPUTE_NUMA 环境变量设置为 false，则直接启动一个 TM 实例，</span><br><span class="line">    # 否则对每个 NUMA 节点，绑定内存和 CPU，启动一个独立的 TM 实例，实现 NUMA 感知的内存局部性优化</span><br><span class="line">    if [[ $FLINK_TM_COMPUTE_NUMA == &quot;false&quot; ]]; then</span><br><span class="line">        # Start a single TaskManager</span><br><span class="line">        &quot;$&#123;FLINK_BIN_DIR&#125;&quot;/flink-daemon.sh $STARTSTOP $ENTRYPOINT &quot;$&#123;ARGS[@]&#125;&quot;</span><br><span class="line">    else</span><br><span class="line">        read -ra NODE_LIST &lt;&lt;&lt; $(numactl --show | grep &quot;^nodebind: &quot;)</span><br><span class="line">        for NODE_ID in &quot;$&#123;NODE_LIST[@]:1&#125;&quot;; do</span><br><span class="line">            # Start a TaskManager for each NUMA node</span><br><span class="line">            numactl --membind=$NODE_ID --cpunodebind=$NODE_ID -- &quot;$&#123;FLINK_BIN_DIR&#125;&quot;/flink-daemon.sh $STARTSTOP $ENTRYPOINT &quot;$&#123;ARGS[@]&#125;&quot;</span><br><span class="line">        done</span><br><span class="line">    fi</span><br><span class="line">fi</span><br></pre></td></tr></table></figure>
+
+<p>以及如下 <code>flink-daemon.sh</code> 脚本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">真正执行 JVM 启动/停止的核心脚本，提供了一个通用的框架来管理 Flink 的各种守护进程，根据传入的参数决定要启动或停止</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">哪个守护进程，并且支持同时启动多个实例</span></span><br><span class="line">USAGE=&quot;Usage: flink-daemon.sh (start|stop|stop-all) (taskexecutor|zookeeper|historyserver|standalonesession|standalonejob|sql-gateway) [args]&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">操作类型参数</span></span><br><span class="line">STARTSTOP=$1</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">守护进程类型参数</span></span><br><span class="line">DAEMON=$2</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">从第三个参数起的所有参数</span></span><br><span class="line">ARGS=(&quot;$&#123;@:3&#125;&quot;)</span><br><span class="line"></span><br><span class="line">bin=`dirname &quot;$0&quot;`</span><br><span class="line">bin=`cd &quot;$bin&quot;; pwd`</span><br><span class="line"></span><br><span class="line">. &quot;$bin&quot;/config.sh</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">根据守护进程类型参数，映射到对应的 Java 主类，后续会通过这个主类来启动 JVM 实例</span></span><br><span class="line">case $DAEMON in</span><br><span class="line">    (taskexecutor)</span><br><span class="line">        CLASS_TO_RUN=org.apache.flink.runtime.taskexecutor.TaskManagerRunner</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    (zookeeper)</span><br><span class="line">        CLASS_TO_RUN=org.apache.flink.runtime.zookeeper.FlinkZooKeeperQuorumPeer</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    (historyserver)</span><br><span class="line">        CLASS_TO_RUN=org.apache.flink.runtime.webmonitor.history.HistoryServer</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    (standalonesession)</span><br><span class="line">        CLASS_TO_RUN=org.apache.flink.runtime.entrypoint.StandaloneSessionClusterEntrypoint</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    (standalonejob)</span><br><span class="line">        CLASS_TO_RUN=org.apache.flink.container.entrypoint.StandaloneApplicationClusterEntryPoint</span><br><span class="line">    ;;</span><br><span class="line">    # 需要额外调用函数加载相关的 Jar 包路径</span><br><span class="line">    (sql-gateway)</span><br><span class="line">        CLASS_TO_RUN=org.apache.flink.table.gateway.SqlGateway</span><br><span class="line">        SQL_GATEWAY_CLASSPATH=&quot;`findSqlGatewayJar`&quot;:&quot;`findFlinkPythonJar`&quot;</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    (*)</span><br><span class="line">        echo &quot;Unknown daemon &#x27;$&#123;DAEMON&#125;&#x27;. $USAGE.&quot;</span><br><span class="line">        exit 1</span><br><span class="line">    ;;</span><br><span class="line">esac</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">FLINK_IDENT_STRING 用于区分同一台机器上不同用户启动的 Flink 进程，默认使用当前系统用户名，它会出现在 PID 文件</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">名和日志文件名中</span></span><br><span class="line">if [ &quot;$FLINK_IDENT_STRING&quot; = &quot;&quot; ]; then</span><br><span class="line">    FLINK_IDENT_STRING=&quot;$USER&quot;</span><br><span class="line">fi</span><br><span class="line"></span><br><span class="line">FLINK_TM_CLASSPATH=`constructFlinkClassPath`</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">PID 文件路径</span></span><br><span class="line">pid=$FLINK_PID_DIR/flink-$FLINK_IDENT_STRING-$DAEMON.pid</span><br><span class="line"></span><br><span class="line">mkdir -p &quot;$FLINK_PID_DIR&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">检测是否有 flock 命令</span></span><br><span class="line">command -v flock &gt;/dev/null 2&gt;&amp;1</span><br><span class="line">if [[ $? -eq 0 ]]; then</span><br><span class="line">    # 用文件描述符 200 打开 PID 目录，并对其加排它锁（默认阻塞等待），防止多个守护进程同时启动时，并发读写 PID 文件</span><br><span class="line">    # 导致日志文件编号冲突，锁在脚本退出时自动释放</span><br><span class="line">    exec 200&lt;&quot;$FLINK_PID_DIR&quot;</span><br><span class="line">    flock 200</span><br><span class="line">fi</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">如果 PID 文件已经存在，则统计其行数，并将行数作为新进程的编号，否则编号为 0，这样同一台机器上可以启动多个相同类型</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">的守护进程，并且它们的日志文件会根据编号区分开来</span></span><br><span class="line">id=$([ -f &quot;$pid&quot; ] &amp;&amp; echo $(wc -l &lt; &quot;$pid&quot;) || echo &quot;0&quot;)</span><br><span class="line"></span><br><span class="line">FLINK_LOG_PREFIX=&quot;$&#123;FLINK_LOG_DIR&#125;/flink-$&#123;FLINK_IDENT_STRING&#125;-$&#123;DAEMON&#125;-$&#123;id&#125;-$&#123;HOSTNAME&#125;&quot;</span><br><span class="line">log=&quot;$&#123;FLINK_LOG_PREFIX&#125;.log&quot;</span><br><span class="line">out=&quot;$&#123;FLINK_LOG_PREFIX&#125;.out&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">构建一个数组，包含传给 JVM 的日志配置参数</span></span><br><span class="line">log_setting=(&quot;-Dlog.file=$&#123;log&#125;&quot; &quot;-Dlog4j.configuration=file:$&#123;FLINK_CONF_DIR&#125;/log4j.properties&quot; &quot;-Dlog4j.configurationFile=file:$&#123;FLINK_CONF_DIR&#125;/log4j.properties&quot; &quot;-Dlogback.configurationFile=file:$&#123;FLINK_CONF_DIR&#125;/logback.xml&quot;)</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">定义一个函数，接收要停止的进程 ID 和守护进程类型作为参数，先发送 SIGTERM 信号请求进程优雅退出，默认在收到信号</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">后 5 秒钟内进程会停止，如果指定了超时时间，则等待指定时间后检查进程是否已经停止，如果没有停止，则发送 SIGKILL</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">信号强制杀死进程，确保进程被完全终止</span></span><br><span class="line">function guaranteed_kill &#123;</span><br><span class="line">  to_stop_pid=$1</span><br><span class="line">  daemon=$2</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_">  # </span><span class="language-bash">send sigterm <span class="keyword">for</span> graceful shutdown</span></span><br><span class="line">  kill $to_stop_pid</span><br><span class="line"><span class="meta prompt_">  # </span><span class="language-bash"><span class="keyword">if</span> <span class="built_in">timeout</span> exists, use it</span></span><br><span class="line">  if command -v timeout &amp;&gt; /dev/null ; then</span><br><span class="line">    # wait 10 seconds for process to stop. By default, Flink kills the JVM 5 seconds after sigterm.</span><br><span class="line">    timeout 10 tail --pid=$to_stop_pid -f /dev/null &amp;&gt; /dev/null</span><br><span class="line">    if [ &quot;$?&quot; -eq 124 ]; then</span><br><span class="line">      echo &quot;Daemon $daemon didn&#x27;t stop within 10 seconds. Killing it.&quot;</span><br><span class="line">      # send sigkill</span><br><span class="line">      kill -9 $to_stop_pid</span><br><span class="line">    fi</span><br><span class="line">  fi</span><br><span class="line">&#125;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">根据操作类型参数，启动或停止相应的进程</span></span><br><span class="line">case $STARTSTOP in</span><br><span class="line">    (start)</span><br><span class="line"></span><br><span class="line">        # Print a warning if daemons are already running on host</span><br><span class="line">        if [ -f &quot;$pid&quot; ]; then</span><br><span class="line">          active=()</span><br><span class="line">          while IFS=&#x27;&#x27; read -r p || [[ -n &quot;$p&quot; ]]; do</span><br><span class="line">            # kill -0 命令不发送信号，仅检查权限和进程存在性</span><br><span class="line">            kill -0 $p &gt;/dev/null 2&gt;&amp;1</span><br><span class="line">            if [ $? -eq 0 ]; then</span><br><span class="line">              active+=($p)</span><br><span class="line">            fi</span><br><span class="line">          done &lt; &quot;$&#123;pid&#125;&quot;</span><br><span class="line"></span><br><span class="line">          count=&quot;$&#123;#active[@]&#125;&quot;</span><br><span class="line"></span><br><span class="line">          if [ $&#123;count&#125; -gt 0 ]; then</span><br><span class="line">            echo &quot;[INFO] $count instance(s) of $DAEMON are already running on $HOSTNAME.&quot;</span><br><span class="line">          fi</span><br><span class="line">        fi</span><br><span class="line"></span><br><span class="line">        # Evaluate user options for local variable expansion</span><br><span class="line">        FLINK_ENV_JAVA_OPTS=$(eval echo $&#123;FLINK_ENV_JAVA_OPTS&#125;)</span><br><span class="line"></span><br><span class="line">        echo &quot;Starting $DAEMON daemon on host $HOSTNAME.&quot;</span><br><span class="line">        # 运行类并传入参数</span><br><span class="line">        &quot;$JAVA_RUN&quot; $JVM_ARGS $&#123;FLINK_ENV_JAVA_OPTS&#125; &quot;$&#123;log_setting[@]&#125;&quot; -classpath &quot;`manglePathList &quot;$FLINK_TM_CLASSPATH:$SQL_GATEWAY_CLASSPATH:$INTERNAL_HADOOP_CLASSPATHS&quot;`&quot; $&#123;CLASS_TO_RUN&#125; &quot;$&#123;ARGS[@]&#125;&quot; &gt; &quot;$out&quot; 200&lt;&amp;- 2&gt;&amp;1 &lt; /dev/null &amp;</span><br><span class="line"></span><br><span class="line">        mypid=$!</span><br><span class="line"></span><br><span class="line">        # Add to pid file if successful start</span><br><span class="line">        if [[ $&#123;mypid&#125; =~ $&#123;IS_NUMBER&#125; ]] &amp;&amp; kill -0 $mypid &gt; /dev/null 2&gt;&amp;1 ; then</span><br><span class="line">            echo $mypid &gt;&gt; &quot;$pid&quot;</span><br><span class="line">        else</span><br><span class="line">            echo &quot;Error starting $DAEMON daemon.&quot;</span><br><span class="line">            exit 1</span><br><span class="line">        fi</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    (stop)</span><br><span class="line">        if [ -f &quot;$pid&quot; ]; then</span><br><span class="line">            # Remove last in pid file</span><br><span class="line">            to_stop=$(tail -n 1 &quot;$pid&quot;)</span><br><span class="line"></span><br><span class="line">            if [ -z $to_stop ]; then</span><br><span class="line">                rm &quot;$pid&quot; # If all stopped, clean up pid file</span><br><span class="line">                echo &quot;No $DAEMON daemon to stop on host $HOSTNAME.&quot;</span><br><span class="line">            else</span><br><span class="line">                sed \$d &quot;$pid&quot; &gt; &quot;$pid.tmp&quot; # all but last line</span><br><span class="line"></span><br><span class="line">                # If all stopped, clean up pid file</span><br><span class="line">                [ $(wc -l &lt; &quot;$pid.tmp&quot;) -eq 0 ] &amp;&amp; rm &quot;$pid&quot; &quot;$pid.tmp&quot; || mv &quot;$pid.tmp&quot; &quot;$pid&quot;</span><br><span class="line"></span><br><span class="line">                if kill -0 $to_stop &gt; /dev/null 2&gt;&amp;1; then</span><br><span class="line">                    echo &quot;Stopping $DAEMON daemon (pid: $to_stop) on host $HOSTNAME.&quot;</span><br><span class="line">                    guaranteed_kill $to_stop $DAEMON</span><br><span class="line">                else</span><br><span class="line">                    echo &quot;No $DAEMON daemon (pid: $to_stop) is running anymore on $HOSTNAME.&quot;</span><br><span class="line">                fi</span><br><span class="line">            fi</span><br><span class="line">        else</span><br><span class="line">            echo &quot;No $DAEMON daemon to stop on host $HOSTNAME.&quot;</span><br><span class="line">        fi</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    (stop-all)</span><br><span class="line">        if [ -f &quot;$pid&quot; ]; then</span><br><span class="line">            mv &quot;$pid&quot; &quot;$&#123;pid&#125;.tmp&quot;</span><br><span class="line"></span><br><span class="line">            while read to_stop; do</span><br><span class="line">                if kill -0 $to_stop &gt; /dev/null 2&gt;&amp;1; then</span><br><span class="line">                    echo &quot;Stopping $DAEMON daemon (pid: $to_stop) on host $HOSTNAME.&quot;</span><br><span class="line">                    guaranteed_kill $to_stop $DAEMON</span><br><span class="line">                else</span><br><span class="line">                    echo &quot;Skipping $DAEMON daemon (pid: $to_stop), because it is not running anymore on $HOSTNAME.&quot;</span><br><span class="line">                fi</span><br><span class="line">            done &lt; &quot;$&#123;pid&#125;.tmp&quot;</span><br><span class="line">            rm &quot;$&#123;pid&#125;.tmp&quot;</span><br><span class="line">        fi</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">    (*)</span><br><span class="line">        echo &quot;Unexpected argument &#x27;$STARTSTOP&#x27;. $USAGE.&quot;</span><br><span class="line">        exit 1</span><br><span class="line">    ;;</span><br><span class="line"></span><br><span class="line">esac</span><br></pre></td></tr></table></figure>
+
+<p>各脚本之间的调用关系如下</p>
+<div align=center><img    
+                       lazyload
+                       alt="image"
+                       data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260503230227204.png"
+                         style="zoom:45%;" 
+                 ></div>
+
+<p><code>start-cluster.sh</code> 脚本启动后，会调用 <code>jobmanager.sh</code> 和 <code>taskmanager.sh</code> 两个脚本，而后两者又各自调用了 <code>flink-daemon.sh</code> 脚本以后台守护进程的方式启动 JobManager 和 TaskManager 的入口类，即 <code>StandaloneSessionClusterEntrypoint</code> 与 <code>TaskManagerRunner</code>。</p>
+<h2 id="二、JobManager-的启动流程"><a href="#二、JobManager-的启动流程" class="headerlink" title="二、JobManager 的启动流程"></a>二、JobManager 的启动流程</h2><p>在 <code>StandaloneSessionClusterEntrypoint</code> 的 <code>main</code> 方法中，通过调用 <code>runClusterEntrypoint</code> → <code>startCluster</code> → <code>runCluster</code> 方法启动集群。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">runCluster</span><span class="params">(Configuration configuration, PluginManager pluginManager)</span></span><br><span class="line">        <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">        <span class="comment">// 初始化集群服务</span></span><br><span class="line">        initializeServices(configuration, pluginManager);</span><br><span class="line"></span><br><span class="line">        configuration.setString(JobManagerOptions.ADDRESS, commonRpcService.getAddress());</span><br><span class="line">        configuration.setInteger(JobManagerOptions.PORT, commonRpcService.getPort());</span><br><span class="line">        <span class="comment">// 创建工厂对象，其中包含了创建 Dispatcher、ResourceManager 和 WebMonitorEndpoint 三个组件的工厂</span></span><br><span class="line">        <span class="keyword">final</span> <span class="type">DispatcherResourceManagerComponentFactory</span></span><br><span class="line">                <span class="variable">dispatcherResourceManagerComponentFactory</span> <span class="operator">=</span></span><br><span class="line">                        createDispatcherResourceManagerComponentFactory(configuration);</span><br><span class="line">        <span class="comment">// 启动 ResourceManager、Dispatcher 和 WebMonitorEndpoint</span></span><br><span class="line">        clusterComponent =</span><br><span class="line">                dispatcherResourceManagerComponentFactory.create(</span><br><span class="line">                        configuration,</span><br><span class="line">                        resourceId.unwrap(),</span><br><span class="line">                        ioExecutor,</span><br><span class="line">                        commonRpcService,</span><br><span class="line">                        haServices,</span><br><span class="line">                        blobServer,</span><br><span class="line">                        heartbeatServices,</span><br><span class="line">                        delegationTokenManager,</span><br><span class="line">                        metricRegistry,</span><br><span class="line">                        executionGraphInfoStore,</span><br><span class="line">                        <span class="keyword">new</span> <span class="title class_">RpcMetricQueryServiceRetriever</span>(</span><br><span class="line">                                metricRegistry.getMetricQueryServiceRpcService()),</span><br><span class="line">                        failureEnrichers,</span><br><span class="line">                        <span class="built_in">this</span>);</span><br><span class="line">        <span class="comment">// 关门服务</span></span><br><span class="line">        clusterComponent</span><br><span class="line">                .getShutDownFuture()</span><br><span class="line">                .whenComplete(</span><br><span class="line">                        (ApplicationStatus applicationStatus, Throwable throwable) -&gt; &#123;</span><br><span class="line">                            <span class="keyword">if</span> (throwable != <span class="literal">null</span>) &#123;</span><br><span class="line">                                shutDownAsync(</span><br><span class="line">                                        ApplicationStatus.UNKNOWN,</span><br><span class="line">                                        ShutdownBehaviour.GRACEFUL_SHUTDOWN,</span><br><span class="line">                                        ExceptionUtils.stringifyException(throwable),</span><br><span class="line">                                        <span class="literal">false</span>);</span><br><span class="line">                            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                                shutDownAsync(</span><br><span class="line">                                        applicationStatus,</span><br><span class="line">                                        ShutdownBehaviour.GRACEFUL_SHUTDOWN,</span><br><span class="line">                                        <span class="literal">null</span>,</span><br><span class="line">                                        <span class="literal">true</span>);</span><br><span class="line">                            &#125;</span><br><span class="line">                        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中调用了 <code>DefaultDispatcherResourceManagerComponentFactory.createSessionComponentFactory(StandaloneResourceManagerFactory.getInstance())</code> 创建工厂。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> DefaultDispatcherResourceManagerComponentFactory <span class="title function_">createSessionComponentFactory</span><span class="params">(</span></span><br><span class="line"><span class="params">        ResourceManagerFactory&lt;?&gt; resourceManagerFactory)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">DefaultDispatcherResourceManagerComponentFactory</span>(</span><br><span class="line">            DefaultDispatcherRunnerFactory.createSessionRunner(</span><br><span class="line">                    SessionDispatcherFactory.INSTANCE),</span><br><span class="line">            resourceManagerFactory,</span><br><span class="line">            SessionRestEndpointFactory.INSTANCE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>工厂内部启动了三个核心组件</p>
+<ol>
+<li><code>Dispatcher</code>：接收作业提交，为每个 Job 创建 JobMaster。</li>
+<li><code>StandaloneResourceManager</code>：Standalone 模式的资源管理器，不主动分配资源，而是等待 TaskManager 主动注册。</li>
+<li><code>WebMonitorEndpoint</code>（REST 服务）：运行在 <code>Dispatcher</code> 中的 REST 服务和 WebUI 的核心承载端点，是 Flink 集群对外提供 HTTP 访问的唯一入口，也是用户、CLI 客户端、第三方监控平台与 Flink 集群交互的核心网关。</li>
+</ol>
+<p>此外，还调用了 <code>initializeServices</code> 方法进行核心初始化工作，包括生成 JobManager 唯一标识、创建工作目录、启动 RPC 服务、启动 BLOB 存储服务、高可用服务等。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title function_">initializeServices</span><span class="params">(Configuration configuration, PluginManager pluginManager)</span></span><br><span class="line">        <span class="keyword">throws</span> Exception &#123;</span><br><span class="line"></span><br><span class="line">    LOG.info(<span class="string">&quot;Initializing cluster services.&quot;</span>);</span><br><span class="line">    <span class="comment">// 生成 JobManager 的唯一标识</span></span><br><span class="line">    <span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">        resourceId =</span><br><span class="line">                configuration</span><br><span class="line">                        .getOptional(JobManagerOptions.JOB_MANAGER_RESOURCE_ID)</span><br><span class="line">                        .map(</span><br><span class="line">                                value -&gt;</span><br><span class="line">                                        DeterminismEnvelope.deterministicValue(</span><br><span class="line">                                                <span class="keyword">new</span> <span class="title class_">ResourceID</span>(value)))</span><br><span class="line">                        <span class="comment">// 如果没有配置就自动生成一个</span></span><br><span class="line">                        .orElseGet(</span><br><span class="line">                                () -&gt;</span><br><span class="line">                                        DeterminismEnvelope.nondeterministicValue(</span><br><span class="line">                                                ResourceID.generate()));</span><br><span class="line"></span><br><span class="line">        LOG.debug(</span><br><span class="line">                <span class="string">&quot;Initialize cluster entrypoint &#123;&#125; with resource id &#123;&#125;.&quot;</span>,</span><br><span class="line">                getClass().getSimpleName(),</span><br><span class="line">                resourceId);</span><br><span class="line">        <span class="comment">// 创建工作目录</span></span><br><span class="line">        workingDirectory =</span><br><span class="line">                ClusterEntrypointUtils.createJobManagerWorkingDirectory(</span><br><span class="line">                        configuration, resourceId);</span><br><span class="line"></span><br><span class="line">        LOG.info(<span class="string">&quot;Using working directory: &#123;&#125;.&quot;</span>, workingDirectory);</span><br><span class="line"></span><br><span class="line">        rpcSystem = RpcSystem.load(configuration);</span><br><span class="line">        <span class="comment">// 创建 RPC 服务，用于组件间通信，最终创建的是 PekkoRpcService</span></span><br><span class="line">        commonRpcService =</span><br><span class="line">                RpcUtils.createRemoteRpcService(</span><br><span class="line">                        rpcSystem,</span><br><span class="line">                        configuration,</span><br><span class="line">                        configuration.getString(JobManagerOptions.ADDRESS),</span><br><span class="line">                        getRPCPortRange(configuration),</span><br><span class="line">                        configuration.getString(JobManagerOptions.BIND_HOST),</span><br><span class="line">                        configuration.getOptional(JobManagerOptions.RPC_BIND_PORT));</span><br><span class="line">        <span class="comment">// 启动 JMX 监控服务</span></span><br><span class="line">        JMXService.startInstance(configuration.getString(JMXServerOptions.JMX_SERVER_PORT));</span><br><span class="line"></span><br><span class="line">        <span class="comment">// update the configuration used to create the high availability services</span></span><br><span class="line">        configuration.setString(JobManagerOptions.ADDRESS, commonRpcService.getAddress());</span><br><span class="line">        configuration.setInteger(JobManagerOptions.PORT, commonRpcService.getPort());</span><br><span class="line">        <span class="comment">// 固定线程池，用于 I/O 操作，如 BlobServer 相关的文件上传下载、与外部系统的交互等，线程数根据配置</span></span><br><span class="line">        <span class="comment">// 计算得出</span></span><br><span class="line">        ioExecutor =</span><br><span class="line">                Executors.newFixedThreadPool(</span><br><span class="line">                        ClusterEntrypointUtils.getPoolSize(configuration),</span><br><span class="line">                        <span class="keyword">new</span> <span class="title class_">ExecutorThreadFactory</span>(<span class="string">&quot;cluster-io&quot;</span>));</span><br><span class="line">        <span class="comment">// 令牌管理器</span></span><br><span class="line">        delegationTokenManager =</span><br><span class="line">                DefaultDelegationTokenManagerFactory.create(</span><br><span class="line">                        configuration,</span><br><span class="line">                        pluginManager,</span><br><span class="line">                        commonRpcService.getScheduledExecutor(),</span><br><span class="line">                        ioExecutor);</span><br><span class="line">        <span class="comment">// 获取安全令牌</span></span><br><span class="line">        delegationTokenManager.obtainDelegationTokens();</span><br><span class="line">        <span class="comment">// 高可用服务</span></span><br><span class="line">        haServices = createHaServices(configuration, ioExecutor, rpcSystem);</span><br><span class="line">        <span class="comment">// 启动 BLOB 存储服务，存储 Job 所依赖的 jar 包和 TM 上传的 log 文件等二进制大对象</span></span><br><span class="line">        blobServer =</span><br><span class="line">                BlobUtils.createBlobServer(</span><br><span class="line">                        configuration,</span><br><span class="line">                        Reference.borrowed(workingDirectory.unwrap().getBlobStorageDirectory()),</span><br><span class="line">                        haServices.createBlobStore());</span><br><span class="line">        blobServer.start();</span><br><span class="line">        configuration.setString(BlobServerOptions.PORT, String.valueOf(blobServer.getPort()));</span><br><span class="line">        <span class="comment">// 心跳服务配置</span></span><br><span class="line">        heartbeatServices = createHeartbeatServices(configuration);</span><br><span class="line">        failureEnrichers = FailureEnricherUtils.getFailureEnrichers(configuration);</span><br><span class="line">         <span class="comment">// 启动指标注册表和查询服务</span></span><br><span class="line">         <span class="comment">// ProcessMetricGroup：用于组织和管理指标的类，包含添加的度量和组的关键功能</span></span><br><span class="line">         <span class="comment">// MetricReporter：用于将 Flink 作业中的指标数据报告给外部系统的组件</span></span><br><span class="line">         <span class="comment">// MetricRegistry：跟踪所有已注册的 Metric 用于作为 MetricGroup 和 MetricReporter 之间的连接</span></span><br><span class="line">         <span class="comment">// 一旦指标被注册到 MetricRegistry 中，它们就可以被各种 MetricReporter 捕获并发送到外部监控系统，</span></span><br><span class="line">        metricRegistry = createMetricRegistry(configuration, pluginManager, rpcSystem);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> <span class="type">RpcService</span> <span class="variable">metricQueryServiceRpcService</span> <span class="operator">=</span></span><br><span class="line">                MetricUtils.startRemoteMetricsRpcService(</span><br><span class="line">                        configuration,</span><br><span class="line">                        commonRpcService.getAddress(),</span><br><span class="line">                        configuration.getString(JobManagerOptions.BIND_HOST),</span><br><span class="line">                        rpcSystem);</span><br><span class="line">        <span class="comment">// WebUI 中获取 JVM 相关的指标</span></span><br><span class="line">        metricRegistry.startQueryService(metricQueryServiceRpcService, <span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> <span class="type">String</span> <span class="variable">hostname</span> <span class="operator">=</span> RpcUtils.getHostname(commonRpcService);</span><br><span class="line"></span><br><span class="line">        processMetricGroup =</span><br><span class="line">                MetricUtils.instantiateProcessMetricGroup(</span><br><span class="line">                        metricRegistry,</span><br><span class="line">                        hostname,</span><br><span class="line">                        ConfigurationUtils.getSystemResourceMetricsProbingInterval(</span><br><span class="line">                                configuration));</span><br><span class="line"></span><br><span class="line">        executionGraphInfoStore =</span><br><span class="line">                createSerializableExecutionGraphStore(</span><br><span class="line">                        configuration, commonRpcService.getScheduledExecutor());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="三、TaskManager-的启动流程"><a href="#三、TaskManager-的启动流程" class="headerlink" title="三、TaskManager 的启动流程"></a>三、TaskManager 的启动流程</h2><p>TaskManager 的启动包含三个步骤，分别是构建并启动 TaskManagerRunner、启动 TaskExecutor、完成与 ResourceManager 的连接。</p>
+<h3 id="3-1-构建并启动-TaskManagerRunner"><a href="#3-1-构建并启动-TaskManagerRunner" class="headerlink" title="3.1 构建并启动 TaskManagerRunner"></a>3.1 构建并启动 TaskManagerRunner</h3><p>在 <code>TaskManagerRunner</code> 的 <code>main</code> 方法中调用 <code>runTaskManager</code> 方法，创建了 <code>TaskManagerRunner</code>，然后执行其 <code>start</code> 方法，在该方法中，首先是调用了 <code>startTaskManagerRunnerServices</code> 方法，创建和启动了多个服务，如高可用服务、心跳服务、监控指标服务等，并创建了 <code>TaskExecutor</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">taskExecutorService =</span><br><span class="line">    taskExecutorServiceFactory.createTaskExecutor(</span><br><span class="line">            <span class="built_in">this</span>.configuration,</span><br><span class="line">            <span class="built_in">this</span>.resourceId.unwrap(),</span><br><span class="line">            rpcService,</span><br><span class="line">            highAvailabilityServices,</span><br><span class="line">            heartbeatServices,</span><br><span class="line">            metricRegistry,</span><br><span class="line">            blobCacheService,</span><br><span class="line">            <span class="literal">false</span>,</span><br><span class="line">            externalResourceInfoProvider,</span><br><span class="line">            workingDirectory.unwrap(),</span><br><span class="line">            <span class="built_in">this</span>,</span><br><span class="line">            delegationTokenReceiverRepository);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> TaskExecutorService <span class="title function_">createTaskExecutorService</span><span class="params">(</span></span><br><span class="line"><span class="params">        Configuration configuration,</span></span><br><span class="line"><span class="params">        ResourceID resourceID,</span></span><br><span class="line"><span class="params">        RpcService rpcService,</span></span><br><span class="line"><span class="params">        HighAvailabilityServices highAvailabilityServices,</span></span><br><span class="line"><span class="params">        HeartbeatServices heartbeatServices,</span></span><br><span class="line"><span class="params">        MetricRegistry metricRegistry,</span></span><br><span class="line"><span class="params">        BlobCacheService blobCacheService,</span></span><br><span class="line"><span class="params">        <span class="type">boolean</span> localCommunicationOnly,</span></span><br><span class="line"><span class="params">        ExternalResourceInfoProvider externalResourceInfoProvider,</span></span><br><span class="line"><span class="params">        WorkingDirectory workingDirectory,</span></span><br><span class="line"><span class="params">        FatalErrorHandler fatalErrorHandler,</span></span><br><span class="line"><span class="params">        DelegationTokenReceiverRepository delegationTokenReceiverRepository)</span></span><br><span class="line">        <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 创建 TaskExecutor 实例</span></span><br><span class="line">    <span class="keyword">final</span> <span class="type">TaskExecutor</span> <span class="variable">taskExecutor</span> <span class="operator">=</span></span><br><span class="line">            startTaskManager(</span><br><span class="line">                    configuration,</span><br><span class="line">                    resourceID,</span><br><span class="line">                    rpcService,</span><br><span class="line">                    highAvailabilityServices,</span><br><span class="line">                    heartbeatServices,</span><br><span class="line">                    metricRegistry,</span><br><span class="line">                    blobCacheService,</span><br><span class="line">                    localCommunicationOnly,</span><br><span class="line">                    externalResourceInfoProvider,</span><br><span class="line">                    workingDirectory,</span><br><span class="line">                    fatalErrorHandler,</span><br><span class="line">                    delegationTokenReceiverRepository);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> TaskExecutorToServiceAdapter.createFor(taskExecutor);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>TaskExecutorService</code> 是定义在 <code>TaskManagerRunner</code> 内的接口，其唯一实现是 <code>TaskExecutorToServiceAdapter</code>。</p>
+<p>然后执行了 <code>TaskExecutorToServiceAdapter</code> 的 <code>start</code> 方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">start</span><span class="params">()</span> &#123;</span><br><span class="line">    taskExecutor.start();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其内部主要负责启动 <code>TaskExecutor</code>。</p>
+<h3 id="3-2-启动-TaskExecutor"><a href="#3-2-启动-TaskExecutor" class="headerlink" title="3.2 启动 TaskExecutor"></a>3.2 启动 TaskExecutor</h3><p><code>TaskExecutor</code> 是 TaskManager 的核心实现类，即一个 <code>TaskExecutor</code> 代表一个 TaskManager（JVM），它继承自 <code>RpcEndpoint</code>（使其成为一个 RPC 端点，可以接收来自ResourceManager 和 JobMaster 的远程调用），并实现了 <code>TaskExecutorGateway</code> 接口（定义对外暴露的 RPC 方法）。核心职责包括</p>
+<ol>
+<li>向 ResourceManager 注册自身，汇报可用的 Slot 资源。</li>
+<li>接收来自 ResourceManager 的 Slot 分配请求。</li>
+<li>连接 JobMaster，将所需的 Slot 提供给 Job。</li>
+<li>接收 JobMaster 提交的 Task，在对应的 Slot 中以独立线程运行。</li>
+<li>管理 Task 的生命周期，包括启动、取消、Checkpoint 触发等。</li>
+</ol>
+<p>一个 Job 可以同时使用多个 <code>TaskExecutor</code>，一个 <code>TaskExecutor</code> 可以同时服务多个 Job（Session 模式下，不同 Job 的 Task 可以运行在同一个 <code>TaskExecutor</code> 的不同 Slot 中）。每个 <code>TaskExecutor</code> 拥有的 Slot 的数量由配置项 <code>taskmanager.numberOfTaskSlots</code> 决定，通常建议其值与机器的 CPU 核数相匹配，避免过度竞争 CPU 资源。默认情况下，同一个 Job 的不同算子子任务可以共享一个 Slot，此时一个 Job 所需的 Slot 总数与该 Job 中的最大并行度相等。</p>
+<blockquote>
+<p>注：每个 TaskManager 是操作系统层面的一个独立进程，该进程内部运行着一个 JVM 实例，意味着每个 TaskManager 拥有独立的堆内存（Heap）和堆外内存（Off-Heap）、独立的垃圾回收（GC）、独立的类加载器（ClassLoader）、独立的线程池。<code>TaskManagerRunner</code> 是 JVM 进程的入口，负责初始化所有服务并启动 <code>TaskExecutor</code>。</p>
+</blockquote>
+<p>执行 <code>start</code> 方法后，触发 RPC 框架调用 <code>TaskExecutor.onStart()</code> 方法，在该方法内部会调用 <code>startTaskExecutorServices</code> 方法启动内部服务</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">startTaskExecutorServices</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 向 HA 服务注册监听器，ResourceManager 可能因为故障发生 Leader 切换，旧连接失效后，监听器通知新的</span></span><br><span class="line">        <span class="comment">// Leader 地址，TaskExecutor 自动重新注册</span></span><br><span class="line">        resourceManagerLeaderRetriever.start(<span class="keyword">new</span> <span class="title class_">ResourceManagerLeaderListener</span>());</span><br><span class="line">        <span class="comment">// 开启 Slot 表，它负责管理 Slot，记录了每个 Slot 的分配情况（空闲/已分配/已激活）、归属的 Job 和</span></span><br><span class="line">        <span class="comment">// Task，并通过内置的超时计时器在 Slot 长时间未被使用时自动触发释放，而且会向 ResourceManager 汇</span></span><br><span class="line">        <span class="comment">// 报当前所有 Slot 的状态快照</span></span><br><span class="line">        taskSlotTable.start(<span class="keyword">new</span> <span class="title class_">SlotActionsImpl</span>(), getMainThreadExecutor());</span><br><span class="line">        <span class="comment">// 启动 Job Leader 服务，当 ResourceManager 将 Slot 分配给某个 Job 后，TaskExecutor 开始监</span></span><br><span class="line">        <span class="comment">// 听该 Job 的 JobMaster 地址，一旦通过 HA 服务发现新的 JobMaster 就自动建立连接，并将已分配的</span></span><br><span class="line">        <span class="comment">// Slot 提供给它</span></span><br><span class="line">        jobLeaderService.start(</span><br><span class="line">                getAddress(), getRpcService(), haServices, <span class="keyword">new</span> <span class="title class_">JobLeaderListenerImpl</span>());</span><br><span class="line">        <span class="comment">// 创建文件缓存，用于缓存从 BlobServer 下载的文件，避免重复下载</span></span><br><span class="line">        fileCache =</span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">FileCache</span>(</span><br><span class="line">                        taskManagerConfiguration.getTmpDirectories(),</span><br><span class="line">                        taskExecutorBlobService.getPermanentBlobService());</span><br><span class="line">        <span class="comment">// 尝试从磁盘加载上次的 Slot 分配快照（本地恢复）</span></span><br><span class="line">        tryLoadLocalAllocationSnapshots();</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        handleStartTaskExecutorServicesException(e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>TaskSlotTable</code> 是 TaskManager 中负责资源的核心组件，它维护了一个 Slot 列表，管理每个 Slot 的状态，负责 Slot 的分配和释放。</p>
+<h3 id="3-3-完成与-ResourceManager-的连接"><a href="#3-3-完成与-ResourceManager-的连接" class="headerlink" title="3.3 完成与 ResourceManager 的连接"></a>3.3 完成与 ResourceManager 的连接</h3><p><code>LeaderRetrievalService</code> 的 <code>start</code> 方法会保存 <code>ResourceManagerLeaderListener</code> 作为监听器，并创建底层的 <code>Driver</code>，启动对外部系统的监听</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">start</span><span class="params">(LeaderRetrievalListener listener)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    checkNotNull(listener, <span class="string">&quot;Listener must not be null.&quot;</span>);</span><br><span class="line">    Preconditions.checkState(</span><br><span class="line">            leaderListener == <span class="literal">null</span>,</span><br><span class="line">            <span class="string">&quot;DefaultLeaderRetrievalService can &quot;</span> + <span class="string">&quot;only be started once.&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">        <span class="comment">// 保存监听器</span></span><br><span class="line">        leaderListener = listener;</span><br><span class="line">        <span class="comment">// 创建驱动器</span></span><br><span class="line">        leaderRetrievalDriver =</span><br><span class="line">                leaderRetrievalDriverFactory.createLeaderRetrievalDriver(</span><br><span class="line">                        <span class="built_in">this</span>, <span class="keyword">new</span> <span class="title class_">LeaderRetrievalFatalErrorHandler</span>());</span><br><span class="line">        LOG.info(<span class="string">&quot;Starting DefaultLeaderRetrievalService with &#123;&#125;.&quot;</span>, leaderRetrievalDriver);</span><br><span class="line"></span><br><span class="line">        running = <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>之后，<code>LeaderRetrievalService</code> 处于持续监听状态，当底层的 <code>Driver</code> 上报 Leader 变化后，会调用 <code>LeaderRetrievalService</code> 的  <code>notifyLeaderAddress</code> 方法，然后调用 <code>Listener</code> 的 <code>notifyLeaderAddress</code> 方法，再调用 <code>TaskExecutor</code> 的 <code>notifyOfNewResourceManagerLeader</code> → <code>reconnectToResourceManager</code> → <code>tryConnectToResourceManager</code> → <code>connectToResourceManager</code> 方法，构建 <code>TaskExecutorRegistration</code>，其中包含了 <code>TaskExecutor</code> 的 RPC 地址、节点 ID、Slot 数量等，然后创建 <code>TaskExecutorToResourceManagerConnection</code> 并调用 <code>start</code> 方法，内部使用 <code>RetryingRegistration</code>（指数退避重试机制）向 ResourceManager 发送注册 <code>TaskExecutor</code> 的 RPC 调用，RM 将 <code>TaskExecutor</code> 记录后启动心跳监控，返回注册结果。注册成功后，<code>TaskExecutor</code> 会向 RM 发送初始 Slot 报告，其中包含所有 Slot 的状态，并开始对 RM 的心跳监控。</p>
+<blockquote>
+<p>注：ZooKeeper HA 和 Kubernetes HA 模式下的 <code>LeaderRetrievalService</code> 的实现类是 <code>DefaultLeaderRetrievalService</code>。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文梳理了 Flink 1.18 集群启动的过程，包括相关脚本的作用和相互之间的调用关系、JobManager 的启动流程、TaskManager 的启动流程。</p>
+
+                    
+                </div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Flink/">Flink</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/posts/how-executiongraph-is-generated-in-flink/"
+                                   title="Flink 中的 ExecutionGraph 是如何生成的？"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Flink 中的 ExecutionGraph 是如何生成的？</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81EntryPoint"><span class="nav-text">一、EntryPoint</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81JobManager-%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-text">二、JobManager 的启动流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81TaskManager-%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-text">三、TaskManager 的启动流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E6%9E%84%E5%BB%BA%E5%B9%B6%E5%90%AF%E5%8A%A8-TaskManagerRunner"><span class="nav-text">3.1 构建并启动 TaskManagerRunner</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E5%90%AF%E5%8A%A8-TaskExecutor"><span class="nav-text">3.2 启动 TaskExecutor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-%E5%AE%8C%E6%88%90%E4%B8%8E-ResourceManager-%E7%9A%84%E8%BF%9E%E6%8E%A5"><span class="nav-text">3.3 完成与 ResourceManager 的连接</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2025</span>&nbsp;-&nbsp;2026
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">Shen Huanglin</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81EntryPoint"><span class="nav-text">一、EntryPoint</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81JobManager-%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-text">二、JobManager 的启动流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81TaskManager-%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-text">三、TaskManager 的启动流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-%E6%9E%84%E5%BB%BA%E5%B9%B6%E5%90%AF%E5%8A%A8-TaskManagerRunner"><span class="nav-text">3.1 构建并启动 TaskManagerRunner</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-%E5%90%AF%E5%8A%A8-TaskExecutor"><span class="nav-text">3.2 启动 TaskExecutor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-%E5%AE%8C%E6%88%90%E4%B8%8E-ResourceManager-%E7%9A%84%E8%BF%9E%E6%8E%A5"><span class="nav-text">3.3 完成与 ResourceManager 的连接</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+
+<!-- lazyload -->
+
+    
+<script src="/js/lazyload.js"></script>
+
+
+
+<div class="">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+
+
+</body>
+</html>
