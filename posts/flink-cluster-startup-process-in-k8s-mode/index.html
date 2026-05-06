@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="Hexo Theme Keep">
+    <meta name="author" content="Shen Huanglin">
+    
+    <title>
+        
+            Flink 集群启动的流程（K8s 模式） |
+        
+        Go For It !
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/favicon.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"shenhuanglin.github.io","root":"/","language":"zh-CN"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#757485","title":"Go For It !","author":"Shen Huanglin","avatar":"/images/touxiang.jpg","favicon":"/images/favicon.png"},"menu":{"home":"/","archives":"/archives"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"Keep writing and Keep loving.","hitokoto":true},"social_contact":{"enable":false,"links":{"github":null,"weixin":null,"qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":true,"hide_header":true},"home":{"announcement":null,"category":true,"tag":false,"post_datetime":"created"},"post":{"author_badge":{"enable":false,"level_badge":false,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":false,"min2read":false},"datetime_format":"YYYY 年 MM 月 DD 日","copyright_info":false,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null}},"code_block":{"tools":{"enable":true,"style":"mac"},"highlight_theme":"default"},"toc":{"enable":true,"number":false,"expand_all":false,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":false,"site_uv":false,"site_pv":true,"page_pv":true}},"local_search":{"enable":false,"preload":false},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":true},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":false},"footer":{"since":2025,"word_count":false,"site_deploy":{"enable":false,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+            <a class="site-name border-box" href="/">
+               Go For It !
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        Flink 集群启动的流程（K8s 模式）
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/touxiang.jpg">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">Shen Huanglin</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2026 年 05 月 06 日</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date" style="display: none;" >
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Wed May 06 2026 18:32:38 GMT+0800">2026 年 05 月 06 日</span>
+                </span>
+            
+        
+
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Flink/">Flink</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+        
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h2 id="一、启动脚本"><a href="#一、启动脚本" class="headerlink" title="一、启动脚本"></a>一、启动脚本</h2><p>K8s 模式下的启动脚本是 <code>kubernetes-session.sh</code></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">bin=`dirname &quot;$0&quot;`</span><br><span class="line">bin=`cd &quot;$bin&quot;; pwd`</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">获取 Flink 配置</span></span><br><span class="line">. &quot;$bin&quot;/config.sh</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置用户表示字符串，区分同一机器上不同用户启动的 Flink 进程</span></span><br><span class="line">if [ &quot;$FLINK_IDENT_STRING&quot; = &quot;&quot; ]; then</span><br><span class="line">        FLINK_IDENT_STRING=&quot;$USER&quot;</span><br><span class="line">fi</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置 JVM 参数，限制 KubernetesSessionCli 进程的最大堆内存为 512MB</span></span><br><span class="line">JVM_ARGS=&quot;$JVM_ARGS -Xmx512m&quot;</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">构建类路径，包含 Flink 核心库和 Hadoop 相关的库</span></span><br><span class="line">CC_CLASSPATH=`manglePathList $(constructFlinkClassPath):$INTERNAL_HADOOP_CLASSPATHS`</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置日志文件路径</span></span><br><span class="line">log=$FLINK_LOG_DIR/flink-$FLINK_IDENT_STRING-k8s-session-$HOSTNAME.log</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">设置日志框架 JVM 参数，指定日志文件和配置文件位置</span></span><br><span class="line">log_setting=&quot;-Dlog.file=&quot;$log&quot; -Dlog4j.configuration=file:&quot;$FLINK_CONF_DIR&quot;/log4j-session.properties -Dlog4j.configurationFile=file:&quot;$FLINK_CONF_DIR&quot;/log4j-session.properties -Dlogback.configurationFile=file:&quot;$FLINK_CONF_DIR&quot;/logback-session.xml&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将 FLINK_CONF_DIR 导出为环境变量，使其对子进程可见，KubernetesSessionCli 进程中可以读取该环境变量来加载配置文件</span></span><br><span class="line">export FLINK_CONF_DIR</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">直接启动 KubernetesSessionCli 进程</span></span><br><span class="line">&quot;$JAVA_RUN&quot; $JVM_ARGS -classpath &quot;$CC_CLASSPATH&quot; $log_setting org.apache.flink.kubernetes.cli.KubernetesSessionCli &quot;$@&quot;</span><br></pre></td></tr></table></figure>
+
+<h2 id="二、KubernetesSessionCli"><a href="#二、KubernetesSessionCli" class="headerlink" title="二、KubernetesSessionCli"></a>二、KubernetesSessionCli</h2><p><code>KubernetesSessionCli</code> 是 <code>kubernetes-session.sh</code> 脚本启动的 Java 客户端进程的核心类，负责将 Flink Session 集群部署到 Kubernetes 或重新连接已有的集群。它本身不是集群的一部分，而是一个短暂的客户端工具。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** KubernetesSession 模式的命令行入口和集群生命周期管理器 */</span></span><br><span class="line"><span class="meta">@Internal</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">KubernetesSessionCli</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">Logger</span> <span class="variable">LOG</span> <span class="operator">=</span> LoggerFactory.getLogger(KubernetesSessionCli.class);</span><br><span class="line">    <span class="comment">/** ATTACHED 模式下，每次轮询用户输入的最大等待时间，单位毫秒 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">long</span> <span class="variable">CLIENT_POLLING_INTERVAL_MS</span> <span class="operator">=</span> <span class="number">3000L</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="type">String</span> <span class="variable">KUBERNETES_CLUSTER_HELP</span> <span class="operator">=</span></span><br><span class="line">            <span class="string">&quot;Available commands:\n&quot;</span></span><br><span class="line">                    + <span class="string">&quot;help - show these commands\n&quot;</span></span><br><span class="line">                    + <span class="string">&quot;stop - stop the kubernetes cluster\n&quot;</span></span><br><span class="line">                    + <span class="string">&quot;quit - quit attach mode&quot;</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Configuration baseConfiguration;</span><br><span class="line">    <span class="comment">/** 用于解析命令行参数，将其转换为配置项 */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> GenericCLI cli;</span><br><span class="line">    <span class="comment">/** SPI 加载器，根据 deployment.target 配置项加载对应的 ClusterClientFactory */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> ClusterClientServiceLoader clusterClientServiceLoader;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">KubernetesSessionCli</span><span class="params">(Configuration configuration, String configDir)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>(configuration, <span class="keyword">new</span> <span class="title class_">DefaultClusterClientServiceLoader</span>(), configDir);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">KubernetesSessionCli</span><span class="params">(</span></span><br><span class="line"><span class="params">            Configuration configuration,</span></span><br><span class="line"><span class="params">            ClusterClientServiceLoader clusterClientServiceLoader,</span></span><br><span class="line"><span class="params">            String configDir)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.baseConfiguration = <span class="keyword">new</span> <span class="title class_">UnmodifiableConfiguration</span>(checkNotNull(configuration));</span><br><span class="line">        <span class="built_in">this</span>.clusterClientServiceLoader = checkNotNull(clusterClientServiceLoader);</span><br><span class="line">        <span class="built_in">this</span>.cli = <span class="keyword">new</span> <span class="title class_">GenericCLI</span>(baseConfiguration, configDir);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/** 获取有效的配置，优先级：命令行参数 &gt; 配置文件 &gt; 默认值 */</span></span><br><span class="line">    Configuration <span class="title function_">getEffectiveConfiguration</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> CliArgsException &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">CommandLine</span> <span class="variable">commandLine</span> <span class="operator">=</span> cli.parseCommandLineOptions(args, <span class="literal">true</span>);</span><br><span class="line">        <span class="keyword">final</span> <span class="type">Configuration</span> <span class="variable">effectiveConfiguration</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Configuration</span>(baseConfiguration);</span><br><span class="line">        <span class="comment">// 将命令行参数覆盖到配置中，优先级高于配置文件</span></span><br><span class="line">        effectiveConfiguration.addAll(cli.toConfiguration(commandLine));</span><br><span class="line">        <span class="comment">// 硬编码设置 deployment.target 为 kubernetes-session 模式</span></span><br><span class="line">        effectiveConfiguration.set(DeploymentOptions.TARGET, KubernetesSessionClusterExecutor.NAME);</span><br><span class="line">        <span class="keyword">return</span> effectiveConfiguration;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> <span class="title function_">run</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> FlinkException, CliArgsException &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">Configuration</span> <span class="variable">configuration</span> <span class="operator">=</span> getEffectiveConfiguration(args);</span><br><span class="line">        <span class="comment">// 获取 KubernetesClusterClientFactory</span></span><br><span class="line">        <span class="keyword">final</span> ClusterClientFactory&lt;String&gt; kubernetesClusterClientFactory =</span><br><span class="line">                clusterClientServiceLoader.getClusterClientFactory(configuration);</span><br><span class="line">        <span class="comment">// KubernetesClusterDescriptor 中封装了所有与 Kubernetes 集群交互的动作</span></span><br><span class="line">        <span class="keyword">final</span> ClusterDescriptor&lt;String&gt; kubernetesClusterDescriptor =</span><br><span class="line">                kubernetesClusterClientFactory.createClusterDescriptor(configuration);</span><br><span class="line">        <span class="comment">// 判断集群是否已经存在</span></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">final</span> ClusterClient&lt;String&gt; clusterClient;</span><br><span class="line">            <span class="type">String</span> <span class="variable">clusterId</span> <span class="operator">=</span> kubernetesClusterClientFactory.getClusterId(configuration);</span><br><span class="line">            <span class="keyword">final</span> <span class="type">boolean</span> <span class="variable">detached</span> <span class="operator">=</span> !configuration.get(DeploymentOptions.ATTACHED);</span><br><span class="line">            <span class="keyword">final</span> <span class="type">FlinkKubeClient</span> <span class="variable">kubeClient</span> <span class="operator">=</span></span><br><span class="line">                    FlinkKubeClientFactory.getInstance().fromConfiguration(configuration, <span class="string">&quot;client&quot;</span>);</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 如果存在则重新连接，获取 ClusterClient 句柄</span></span><br><span class="line">            <span class="keyword">if</span> (clusterId != <span class="literal">null</span></span><br><span class="line">                    &amp;&amp; kubeClient</span><br><span class="line">                    .getService(ExternalServiceDecorator.getExternalServiceName(clusterId))</span><br><span class="line">                    .isPresent()) &#123;</span><br><span class="line">                clusterClient = kubernetesClusterDescriptor.retrieve(clusterId).getClusterClient();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 如果不存在则部署一个新的 Session 集群</span></span><br><span class="line">            <span class="keyword">else</span> &#123;</span><br><span class="line">                clusterClient =</span><br><span class="line">                        kubernetesClusterDescriptor</span><br><span class="line">                                .deploySessionCluster(</span><br><span class="line">                                        kubernetesClusterClientFactory.getClusterSpecification(</span><br><span class="line">                                                configuration))</span><br><span class="line">                                .getClusterClient();</span><br><span class="line">                clusterId = clusterClient.getClusterId();</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="comment">// 根据是否是 Detached 模式，决定是否进入交互式命令行界面。Detached 是默认模式，也是生产环境中最常用</span></span><br><span class="line">            <span class="comment">// 的模式，部署完集群后客户端退出，集群长期运行。如果是 Attached 模式，则会进入 REPL 循环，repStep</span></span><br><span class="line">            <span class="comment">// 方法每 3 秒检查一次标准输入，通常在需要交互式管理集群时使用</span></span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                <span class="keyword">if</span> (!detached) &#123;</span><br><span class="line">                    Tuple2&lt;Boolean, Boolean&gt; continueRepl = <span class="keyword">new</span> <span class="title class_">Tuple2</span>&lt;&gt;(<span class="literal">true</span>, <span class="literal">false</span>);</span><br><span class="line">                    <span class="keyword">try</span> (<span class="type">BufferedReader</span> <span class="variable">in</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">BufferedReader</span>(<span class="keyword">new</span> <span class="title class_">InputStreamReader</span>(System.in))) &#123;</span><br><span class="line">                        <span class="keyword">while</span> (continueRepl.f0) &#123;</span><br><span class="line">                            continueRepl = repStep(in);</span><br><span class="line">                        &#125;</span><br><span class="line">                    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                        LOG.warn(</span><br><span class="line">                                <span class="string">&quot;Exception while running the interactive command line interface.&quot;</span>,</span><br><span class="line">                                e);</span><br><span class="line">                    &#125;</span><br><span class="line">                    <span class="keyword">if</span> (continueRepl.f1) &#123;</span><br><span class="line">                        kubernetesClusterDescriptor.killCluster(clusterId);</span><br><span class="line">                    &#125;</span><br><span class="line">                &#125;</span><br><span class="line">                clusterClient.close();</span><br><span class="line">                kubeClient.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                LOG.info(<span class="string">&quot;Could not properly shutdown cluster client.&quot;</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">            <span class="keyword">try</span> &#123;</span><br><span class="line">                kubernetesClusterDescriptor.close();</span><br><span class="line">            &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">                LOG.info(<span class="string">&quot;Could not properly close the kubernetes cluster descriptor.&quot;</span>, e);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 循环读取客户端输入，处理用户的交互式命令</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> in 标准输入的 BufferedReader，等待用户输入命令</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span> f0 代表是否继续读取输入，f1 代表是否需要停止集群</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> Tuple2&lt;Boolean, Boolean&gt; <span class="title function_">repStep</span><span class="params">(BufferedReader in)</span></span><br><span class="line">            <span class="keyword">throws</span> IOException, InterruptedException &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">long</span> <span class="variable">startTime</span> <span class="operator">=</span> System.currentTimeMillis();</span><br><span class="line">        <span class="keyword">while</span> ((System.currentTimeMillis() - startTime) &lt; CLIENT_POLLING_INTERVAL_MS</span><br><span class="line">                &amp;&amp; (!in.ready())) &#123;</span><br><span class="line">            Thread.sleep(<span class="number">200L</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (in.ready()) &#123;</span><br><span class="line">            <span class="keyword">final</span> <span class="type">String</span> <span class="variable">command</span> <span class="operator">=</span> in.readLine();</span><br><span class="line">            <span class="keyword">switch</span> (command) &#123;</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;quit&quot;</span>:</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Tuple2</span>&lt;&gt;(<span class="literal">false</span>, <span class="literal">false</span>);</span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;stop&quot;</span>:</span><br><span class="line">                    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Tuple2</span>&lt;&gt;(<span class="literal">false</span>, <span class="literal">true</span>);</span><br><span class="line"></span><br><span class="line">                <span class="keyword">case</span> <span class="string">&quot;help&quot;</span>:</span><br><span class="line">                    System.err.println(KUBERNETES_CLUSTER_HELP);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">                <span class="keyword">default</span>:</span><br><span class="line">                    System.err.println(<span class="string">&quot;Unknown command &#x27;&quot;</span> + command + <span class="string">&quot;&#x27;. Showing help:&quot;</span>);</span><br><span class="line">                    System.err.println(KUBERNETES_CLUSTER_HELP);</span><br><span class="line">                    <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Tuple2</span>&lt;&gt;(<span class="literal">true</span>, <span class="literal">false</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="comment">// 加载配置文件</span></span><br><span class="line">        <span class="keyword">final</span> <span class="type">Configuration</span> <span class="variable">configuration</span> <span class="operator">=</span> GlobalConfiguration.loadConfiguration();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> <span class="type">String</span> <span class="variable">configDir</span> <span class="operator">=</span> CliFrontend.getConfigurationDirectoryFromEnv();</span><br><span class="line"></span><br><span class="line">        <span class="type">int</span> retCode;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="keyword">final</span> <span class="type">KubernetesSessionCli</span> <span class="variable">cli</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">KubernetesSessionCli</span>(configuration, configDir);</span><br><span class="line">            <span class="comment">// 在安全上下文中执行 run 方法</span></span><br><span class="line">            retCode = SecurityUtils.getInstalledContext().runSecured(() -&gt; cli.run(args));</span><br><span class="line">        &#125; <span class="keyword">catch</span> (CliArgsException e) &#123;</span><br><span class="line">            retCode = AbstractCustomCommandLine.handleCliArgsException(e, LOG);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">            retCode = AbstractCustomCommandLine.handleError(e, LOG);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        System.exit(retCode);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th align="center"></th>
+<th align="center">Detached 模式</th>
+<th align="center">Attached 模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">配置</td>
+<td align="center">默认</td>
+<td align="center"><code>-Dexecution.attached=true</code></td>
+</tr>
+<tr>
+<td align="center">客户端生命周期</td>
+<td align="center">部署完成后立即退出</td>
+<td align="center">保持运行，等待客户端输入</td>
+</tr>
+<tr>
+<td align="center">集群生命周期</td>
+<td align="center">独立于客户端</td>
+<td align="center">客户端退出时集群继续运行或停止</td>
+</tr>
+<tr>
+<td align="center">命令</td>
+<td align="center">&#x2F;</td>
+<td align="center"><code>quit</code>（退出客户端，不停止集群）、<code>stop</code>（退出客户端，同时停止集群）、<code>help</code>（打印帮助信息，继续循环）</td>
+</tr>
+<tr>
+<td align="center">适用场景</td>
+<td align="center">生产环境长期运行</td>
+<td align="center">交互式管理，脚本化停止集群</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>注：重新连接到已有集群的目的取决于是否使用 Attached 模式，核心是获取已有集群的 <code>ClusterClient</code> 句柄，以便对其进行操作。拿到句柄后，Detached 模式（默认）会打印 WebUI 地址后直接退出，无其他操作，而在 Attached 模式（<code>-Dexecution.attached=true</code>）下会进入交互循环，等待输入 <code>stop</code> 命令停止集群。</p>
+</blockquote>
+<h2 id="三、JobManager-的启动流程"><a href="#三、JobManager-的启动流程" class="headerlink" title="三、JobManager 的启动流程"></a>三、JobManager 的启动流程</h2><p>部署 Session 集群的工作由 <code>ClusterDescriptor</code> 接口（K8s 模式下的实现类是 <code>KubernetesClusterDescriptor</code>）的 <code>deploySessionCluster</code> 方法完成，而它又调用了 <code>deployClusterInternal</code> 方法进行部署。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 负责将 Flink JobManager 部署到 Kubernetes 集群</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> entryPoint JobManager 入口类名称</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> clusterSpecification 集群规格，包括 JM 内存、TM 内存、每个 TM 的 Slot 数量等信息</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> detached 是否以 Detached 模式部署，如果是 Detached 模式，ClusterEntrypoint 会在启动时直接退出，</span></span><br><span class="line"><span class="comment"> *         交由 Kubernetes 来管理生命周期；如果是 Normal 模式，ClusterEntrypoint 会在启动后一直运行，直到集群被关闭</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@return</span> ClusterClientProvider 用于获取 ClusterClient 来与 Flink 集群交互</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@throws</span> ClusterDeploymentException 如果部署过程中发生任何异常，都会被封装成 ClusterDeploymentException 抛出</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">private</span> ClusterClientProvider&lt;String&gt; <span class="title function_">deployClusterInternal</span><span class="params">(</span></span><br><span class="line"><span class="params">        String entryPoint, ClusterSpecification clusterSpecification, <span class="type">boolean</span> detached)</span></span><br><span class="line">        <span class="keyword">throws</span> ClusterDeploymentException &#123;</span><br><span class="line">    <span class="comment">// 获取执行模式</span></span><br><span class="line">    <span class="keyword">final</span> ClusterEntrypoint.<span class="type">ExecutionMode</span> <span class="variable">executionMode</span> <span class="operator">=</span></span><br><span class="line">            detached</span><br><span class="line">                    ? ClusterEntrypoint.ExecutionMode.DETACHED</span><br><span class="line">                    : ClusterEntrypoint.ExecutionMode.NORMAL;</span><br><span class="line"></span><br><span class="line">    flinkConfig.setString(</span><br><span class="line">            ClusterEntrypoint.INTERNAL_CLUSTER_EXECUTION_MODE, executionMode.toString());</span><br><span class="line">    <span class="comment">// 写入入口类名称</span></span><br><span class="line">    flinkConfig.setString(KubernetesConfigOptionsInternal.ENTRY_POINT_CLASS, entryPoint);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 设置 Blob Server 的端口，用于传输 Jar 包</span></span><br><span class="line">    KubernetesUtils.checkAndUpdatePortConfigOption(</span><br><span class="line">            flinkConfig, BlobServerOptions.PORT, Constants.BLOB_SERVER_PORT);</span><br><span class="line">    <span class="comment">// 设置 TM 的 RPC 端口</span></span><br><span class="line">    KubernetesUtils.checkAndUpdatePortConfigOption(</span><br><span class="line">            flinkConfig, TaskManagerOptions.RPC_PORT, Constants.TASK_MANAGER_RPC_PORT);</span><br><span class="line">    <span class="comment">// 设置 REST 端口，用于 REST API 和 WebUI</span></span><br><span class="line">    KubernetesUtils.checkAndUpdatePortConfigOption(</span><br><span class="line">            flinkConfig, RestOptions.BIND_PORT, Constants.REST_PORT);</span><br><span class="line">    <span class="comment">// 如果启用了 HA 模式，则将 Cluster ID 写入配置，用于 HA 服务中的命名空间隔离，并将 JM 的 RPC 端口范围</span></span><br><span class="line">    <span class="comment">// 配置为单个端口，确保 HA 选举后新 Leader 使用相同的端口继续提供服务，避免客户端连接中断</span></span><br><span class="line">    <span class="keyword">if</span> (HighAvailabilityMode.isHighAvailabilityModeActivated(flinkConfig)) &#123;</span><br><span class="line">        flinkConfig.setString(HighAvailabilityOptions.HA_CLUSTER_ID, clusterId);</span><br><span class="line">        KubernetesUtils.checkAndUpdatePortConfigOption(</span><br><span class="line">                flinkConfig,</span><br><span class="line">                HighAvailabilityOptions.HA_JOB_MANAGER_PORT_RANGE,</span><br><span class="line">                flinkConfig.get(JobManagerOptions.PORT));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 构建 JM K8s 资源规格</span></span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">        <span class="comment">// 封装参数</span></span><br><span class="line">        <span class="keyword">final</span> <span class="type">KubernetesJobManagerParameters</span> <span class="variable">kubernetesJobManagerParameters</span> <span class="operator">=</span></span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">KubernetesJobManagerParameters</span>(flinkConfig, clusterSpecification);</span><br><span class="line">        <span class="comment">// 加载 Pod 模板，如果用户指定了模板文件路径，则从文件加载，否则使用默认配置创建一个空的 Pod 模板</span></span><br><span class="line">        <span class="keyword">final</span> <span class="type">FlinkPod</span> <span class="variable">podTemplate</span> <span class="operator">=</span></span><br><span class="line">                kubernetesJobManagerParameters</span><br><span class="line">                        .getPodTemplateFilePath()</span><br><span class="line">                        .map(</span><br><span class="line">                                file -&gt;</span><br><span class="line">                                        KubernetesUtils.loadPodFromTemplateFile(</span><br><span class="line">                                                client, file, Constants.MAIN_CONTAINER_NAME))</span><br><span class="line">                        .orElse(<span class="keyword">new</span> <span class="title class_">FlinkPod</span>.Builder().build());</span><br><span class="line">        <span class="comment">// 使用装饰器模式逐步构建完整的 K8s 资源规格，包括 Pod 模板和其他参数</span></span><br><span class="line">        <span class="keyword">final</span> <span class="type">KubernetesJobManagerSpecification</span> <span class="variable">kubernetesJobManagerSpec</span> <span class="operator">=</span></span><br><span class="line">                KubernetesJobManagerFactory.buildKubernetesJobManagerSpecification(</span><br><span class="line">                        podTemplate, kubernetesJobManagerParameters);</span><br><span class="line">        <span class="comment">// 向 Kubernetes 集群提交 JM 资源规格，完成部署</span></span><br><span class="line">        client.createJobManagerComponent(kubernetesJobManagerSpec);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> createClusterClientProvider(clusterId);</span><br><span class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            LOG.warn(</span><br><span class="line">                    <span class="string">&quot;Failed to create the Kubernetes cluster \&quot;&#123;&#125;\&quot;, try to clean up the residual resources.&quot;</span>,</span><br><span class="line">                    clusterId);</span><br><span class="line">            client.stopAndCleanupCluster(clusterId);</span><br><span class="line">        &#125; <span class="keyword">catch</span> (Exception e1) &#123;</span><br><span class="line">            LOG.info(</span><br><span class="line">                    <span class="string">&quot;Failed to stop and clean up the Kubernetes cluster \&quot;&#123;&#125;\&quot;.&quot;</span>,</span><br><span class="line">                    clusterId,</span><br><span class="line">                    e1);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">ClusterDeploymentException</span>(</span><br><span class="line">                <span class="string">&quot;Could not create Kubernetes cluster \&quot;&quot;</span> + clusterId + <span class="string">&quot;\&quot;.&quot;</span>, e);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Pod 是 Kubernetes 中的最小可部署单元，是一个或多个容器的集合，这些容器共享一个网络命名空间（IP 地址、端口）和存储卷（Volume），核心特性如下：</p>
+<table>
+<thead>
+<tr>
+<th align="center">特性</th>
+<th align="center">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">共享网络</td>
+<td align="center">所有容器共享同一个 IP 地址，容器之间通过 localhost 通信</td>
+</tr>
+<tr>
+<td align="center">共享存储</td>
+<td align="center">所有容器可以挂载相同的 Volume，共享文件</td>
+</tr>
+<tr>
+<td align="center">原子调度</td>
+<td align="center">调度的最小单位，所有容器一定运行在同一台物理机上</td>
+</tr>
+<tr>
+<td align="center">短暂性</td>
+<td align="center">Pod 本身是临时的，被删除后不会自动重建</td>
+</tr>
+</tbody></table>
+<p>Pod 内的容器可以分为主容器和 Sidecar 容器（可选），前者负责运行实际业务进程，后者负责日志收集、代理等辅助进程。大多数情况下，一个 Pod 只包含一个主容器。</p>
+<p>在 Flink 的 K8s 部署中，Pod 是 JobManager 和 TaskManager 的运行载体，Pod 内的容器启动时会执行 <code>docker-entrypoint.sh</code>，该脚本根据传入的参数执行 <code>kubernetes-jobmanager.sh</code> 或 <code>kubernetes-taskmanager.sh</code>，最终启动对应的 JVM 进程。</p>
+<p>JobManager Pod 的启动流程在 <code>CmdJobManagerDecorator</code> 中实现，它会将 <code>command</code> 和 <code>args</code> 写入 Pod 的主容器</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CmdJobManagerDecorator</span> <span class="keyword">extends</span> <span class="title class_">AbstractKubernetesStepDecorator</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> KubernetesJobManagerParameters kubernetesJobManagerParameters;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">CmdJobManagerDecorator</span><span class="params">(KubernetesJobManagerParameters kubernetesJobManagerParameters)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.kubernetesJobManagerParameters = checkNotNull(kubernetesJobManagerParameters);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> FlinkPod <span class="title function_">decorateFlinkPod</span><span class="params">(FlinkPod flinkPod)</span> &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">Container</span> <span class="variable">mainContainerWithStartCmd</span> <span class="operator">=</span></span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">ContainerBuilder</span>(flinkPod.getMainContainer())</span><br><span class="line">                        <span class="comment">// 读取配置项 kubernetes.entry.path，默认值是 /docker-entrypoint.sh</span></span><br><span class="line">                        .withCommand(kubernetesJobManagerParameters.getContainerEntrypoint())</span><br><span class="line">                        <span class="comment">// 返回的参列表是 [&quot;bash&quot;, &quot;-c&quot;, &quot;kubernetes-jobmanager.sh kubernetes-session &lt;entrypointArgs&gt;&quot;]</span></span><br><span class="line">                        .withArgs(getJobManagerStartCommand())</span><br><span class="line">                        .build();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">FlinkPod</span>.Builder(flinkPod).withMainContainer(mainContainerWithStartCmd).build();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> List&lt;String&gt; <span class="title function_">getJobManagerStartCommand</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="comment">// 获取 JM 入口类的名称</span></span><br><span class="line">        <span class="keyword">final</span> <span class="type">KubernetesDeploymentTarget</span> <span class="variable">deploymentTarget</span> <span class="operator">=</span></span><br><span class="line">                KubernetesDeploymentTarget.fromConfig(</span><br><span class="line">                        kubernetesJobManagerParameters.getFlinkConfiguration());</span><br><span class="line">        <span class="keyword">return</span> KubernetesUtils.getStartCommandWithBashWrapper(</span><br><span class="line">                <span class="comment">// 常量是值是 kubernetes-jobmanager.sh</span></span><br><span class="line">                Constants.KUBERNETES_JOB_MANAGER_SCRIPT_PATH</span><br><span class="line">                        + <span class="string">&quot; &quot;</span></span><br><span class="line">                        + deploymentTarget.getName()</span><br><span class="line">                        + <span class="string">&quot; &quot;</span></span><br><span class="line">                        + kubernetesJobManagerParameters.getEntrypointArgs());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>K8s 容器实际执行的命令是</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/docker-entrypoint.sh bash -c <span class="string">&quot;kubernetes-jobmanager.sh kubernetes-session &lt;args&gt;&quot;</span>  </span><br></pre></td></tr></table></figure>
+
+<p>Pod 容器的 <code>command</code> 由配置项 <code>kubernetes.entry.path</code> 控制，默认值为 <code>/docker-entrypoint.sh</code>，它是 Flink 官方 Docker 镜像内置的入口脚本，负责接收脚本名称作为参数并调用对应的脚本，它将 <code>bash -c &quot;...&quot;</code> 作为参数接收，并直接 <code>exec</code> 执行，最终调用 <code>kubernetes-jobmanager.sh</code>。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">USAGE=&quot;Usage: kubernetes-jobmanager.sh kubernetes-session|kubernetes-application [args]&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">读取第一个参数，只能是 kubernetes-session 或 kubernetes-application，分别对应 Flink 的 Session 模式和</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Application 模式，前者的 JM 入口类是 KubernetesSessionClusterEntrypoint，</span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">后者的 JM 入口类是 KubernetesApplicationClusterEntrypoint</span></span><br><span class="line">ENTRY_POINT_NAME=$1</span><br><span class="line"></span><br><span class="line">ARGS=(&quot;$&#123;@:2&#125;&quot;)</span><br><span class="line"></span><br><span class="line">bin=`dirname &quot;$0&quot;`</span><br><span class="line">bin=`cd &quot;$bin&quot;; pwd`</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">加载 Flink 公共配置</span></span><br><span class="line">. &quot;$bin&quot;/config.sh</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">追加 JM 专属的 JVM 参数</span></span><br><span class="line">export FLINK_ENV_JAVA_OPTS=&quot;$&#123;FLINK_ENV_JAVA_OPTS&#125; $&#123;FLINK_ENV_JAVA_OPTS_JM&#125;&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">解析 JM 参数并计算内存配置</span></span><br><span class="line">parseJmArgsAndExportLogs &quot;$&#123;ARGS[@]&#125;&quot;</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">将内存参数前置到 ARGS 中</span></span><br><span class="line">if [ ! -z &quot;$&#123;DYNAMIC_PARAMETERS&#125;&quot; ]; then</span><br><span class="line">    ARGS=($&#123;DYNAMIC_PARAMETERS[@]&#125; &quot;$&#123;ARGS[@]&#125;&quot;)</span><br><span class="line">fi</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">使用 <span class="built_in">exec</span> 替换当前 shell 进程，启动 flink-console.sh，其接收到入口类参数后，启动对应的 JM 进程</span></span><br><span class="line">exec &quot;$&#123;FLINK_BIN_DIR&#125;&quot;/flink-console.sh $&#123;ENTRY_POINT_NAME&#125; &quot;$&#123;ARGS[@]&#125;&quot;</span><br></pre></td></tr></table></figure>
+
+<p>在前面分析 Standalone 模式下 Flink 集群的启动流程的文章中，JM 和 TM 均采用后台守护进程方式（使用 <code>flink-daemon.sh</code> 脚本）启动，而在 K8s 模式下，JM 采用前台方式（使用 <code>flink-console.sh</code> 脚本）启动，原因是在 Kubernetes 中容器的生命周期由其主进程（PID 1）决定，主进程退出，容器就退出，随后 K8s 根据重启策略决定是否重启 Pod。如果使用 <code>flink-daemon.sh</code>  脚本，JVM 进程被放在后台运行，Shell 脚本（容器的主进程）随机退出，K8s 会立即终止整个 Pod，导致 JobManager 被杀死。如果使用 <code>flink-console.sh</code> 脚本，则 JVM 进程通过 <code>exec</code> 成为容器的主进程，容器的生命周期与 JVM 进程完全绑定。</p>
+<h2 id="四、TaskManager-的启动流程"><a href="#四、TaskManager-的启动流程" class="headerlink" title="四、TaskManager 的启动流程"></a>四、TaskManager 的启动流程</h2><p>在 K8s 模式中，TaskManager 在集群启动时不会预先创建，而是在 Job 提交后，<code>ActiveResourceManager</code> 根据 Slot 需求调用 <code>KubernetesResourceManagerDriver.requestResource()</code> 方法请求资源。<code>KubernetesResourceManagerDriver</code> 是 K8s 层的入口，在它的 <code>requestResource</code> 方法中，调用了 <code>KubernetesTaskManagerFactory.buildTaskManagerKubernetesPod()</code> 方法创建 TaskManager Pod。与 JobManager 类似，在 <code>buildTaskManagerKubernetesPod</code> 方法中，也是通过装饰器的方式创建 TaskManager。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">CmdTaskManagerDecorator</span> <span class="keyword">extends</span> <span class="title class_">AbstractKubernetesStepDecorator</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">final</span> KubernetesTaskManagerParameters kubernetesTaskManagerParameters;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">CmdTaskManagerDecorator</span><span class="params">(</span></span><br><span class="line"><span class="params">            KubernetesTaskManagerParameters kubernetesTaskManagerParameters)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>.kubernetesTaskManagerParameters = checkNotNull(kubernetesTaskManagerParameters);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> FlinkPod <span class="title function_">decorateFlinkPod</span><span class="params">(FlinkPod flinkPod)</span> &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">Container</span> <span class="variable">mainContainerWithStartCmd</span> <span class="operator">=</span></span><br><span class="line">                <span class="keyword">new</span> <span class="title class_">ContainerBuilder</span>(flinkPod.getMainContainer())</span><br><span class="line">                        <span class="comment">// 读取配置项 kubernetes.entry.path，默认值是 /docker-entrypoint.sh</span></span><br><span class="line">                        .withCommand(kubernetesTaskManagerParameters.getContainerEntrypoint())</span><br><span class="line">                        .withArgs(getTaskManagerStartCommand())</span><br><span class="line">                        .addToEnv(</span><br><span class="line">                                <span class="keyword">new</span> <span class="title class_">EnvVarBuilder</span>()</span><br><span class="line">                                        .withName(Constants.ENV_TM_JVM_MEM_OPTS)</span><br><span class="line">                                        .withValue(</span><br><span class="line">                                                kubernetesTaskManagerParameters.getJvmMemOptsEnv())</span><br><span class="line">                                        .build())</span><br><span class="line">                        .build();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">FlinkPod</span>.Builder(flinkPod).withMainContainer(mainContainerWithStartCmd).build();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> List&lt;String&gt; <span class="title function_">getTaskManagerStartCommand</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">String</span> <span class="variable">resourceArgs</span> <span class="operator">=</span></span><br><span class="line">                TaskExecutorProcessUtils.generateDynamicConfigsStr(</span><br><span class="line">                        kubernetesTaskManagerParameters</span><br><span class="line">                                .getContaineredTaskManagerParameters()</span><br><span class="line">                                .getTaskExecutorProcessSpec());</span><br><span class="line"></span><br><span class="line">        <span class="keyword">final</span> <span class="type">String</span> <span class="variable">dynamicProperties</span> <span class="operator">=</span> kubernetesTaskManagerParameters.getDynamicProperties();</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> KubernetesUtils.getStartCommandWithBashWrapper(</span><br><span class="line">                <span class="comment">// 常量的值是 kubernetes-taskmanager.sh</span></span><br><span class="line">                Constants.KUBERNETES_TASK_MANAGER_SCRIPT_PATH</span><br><span class="line">                        + <span class="string">&quot; &quot;</span></span><br><span class="line">                        + dynamicProperties</span><br><span class="line">                        + <span class="string">&quot; &quot;</span></span><br><span class="line">                        + resourceArgs</span><br><span class="line">                        + <span class="string">&quot; &quot;</span></span><br><span class="line">                        + kubernetesTaskManagerParameters.getEntrypointArgs());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>kubernetes-taskmanager.sh</code> 脚本中，同样使用 <code>flink-console.sh</code>，使  JVM 进程通过 <code>exec</code> 成为容器的主进程。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">USAGE=&quot;Usage: kubernetes-taskmanager.sh [args]&quot;</span><br><span class="line"></span><br><span class="line">ENTRYPOINT=kubernetes-taskmanager</span><br><span class="line"></span><br><span class="line">ARGS=(&quot;$&#123;@:1&#125;&quot;)</span><br><span class="line"></span><br><span class="line">bin=`dirname &quot;$0&quot;`</span><br><span class="line">bin=`cd &quot;$bin&quot;; pwd`</span><br><span class="line"></span><br><span class="line">. &quot;$bin&quot;/config.sh</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash"><span class="keyword">if</span> no other JVM options are <span class="built_in">set</span>, <span class="built_in">set</span> the GC to G1</span></span><br><span class="line">if [ -z &quot;$&#123;FLINK_ENV_JAVA_OPTS&#125;&quot; ] &amp;&amp; [ -z &quot;$&#123;FLINK_ENV_JAVA_OPTS_TM&#125;&quot; ]; then</span><br><span class="line">    export JVM_ARGS=&quot;$JVM_ARGS -XX:+UseG1GC&quot;</span><br><span class="line">fi</span><br><span class="line"><span class="meta prompt_"></span></span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">Add TaskManager specific JVM options</span></span><br><span class="line">export FLINK_ENV_JAVA_OPTS=&quot;$&#123;FLINK_ENV_JAVA_OPTS&#125; $&#123;FLINK_ENV_JAVA_OPTS_TM&#125;&quot;</span><br><span class="line">export JVM_ARGS=&quot;$JVM_ARGS $FLINK_TM_JVM_MEM_OPTS&quot;</span><br><span class="line"></span><br><span class="line">ARGS=(&quot;--configDir&quot; &quot;$&#123;FLINK_CONF_DIR&#125;&quot; &quot;$&#123;ARGS[@]&#125;&quot;)</span><br><span class="line"></span><br><span class="line">exec &quot;$&#123;FLINK_BIN_DIR&#125;&quot;/flink-console.sh $ENTRYPOINT &quot;$&#123;ARGS[@]&#125;&quot;</span><br></pre></td></tr></table></figure>
+
+<p>Job 结束后，对应的 TaskManager Pod 也会被销毁。</p>
+<h2 id="五、与-Standalone-模式的区别"><a href="#五、与-Standalone-模式的区别" class="headerlink" title="五、与 Standalone 模式的区别"></a>五、与 Standalone 模式的区别</h2><table>
+<thead>
+<tr>
+<th align="center">维度</th>
+<th align="center">Standalone</th>
+<th align="center">KubernetesSession</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="center">启动入口</td>
+<td align="center"><code>start-cluster.sh</code>（Shell 脚本）</td>
+<td align="center"><code>kubernetes-session.sh</code> → <code>KubernetesSessionCli</code>（Java 客户端）</td>
+</tr>
+<tr>
+<td align="center">JM 启动方式</td>
+<td align="center"><code>flink-daemon.sh</code> 直接启动 JVM 进程</td>
+<td align="center">客户端向 K8s API 提交 <code>Deployment</code>，K8s 调度 Pod</td>
+</tr>
+<tr>
+<td align="center">TM 启动方式</td>
+<td align="center"><code>start-cluster.sh</code> 预先静态启动</td>
+<td align="center"><code>KubernetesResourceManagerDriver</code> 按需动态创建 Pod</td>
+</tr>
+<tr>
+<td align="center">RM 类型</td>
+<td align="center"><code>StandaloneResourceManager</code>（被动）</td>
+<td align="center"><code>ActiveResourceManager</code>（主动）</td>
+</tr>
+<tr>
+<td align="center">HA 服务</td>
+<td align="center"><code>StandaloneHaServices</code>（无 HA）</td>
+<td align="center"><code>KubernetesLeaderElectionHaServices</code>（ConfigMap）</td>
+</tr>
+<tr>
+<td align="center">TM 发现 RM 地址</td>
+<td align="center"><code>StandaloneLeaderRetrievalService</code>（固定地址）</td>
+<td align="center"><code>KubernetesLeaderRetrievalDriver</code>（Watch ConfigMap）</td>
+</tr>
+</tbody></table>
+<p><code>Deployment</code> 是 Kubernetes 中的工作负载控制器，用于声明式的管理 Pod 的生命周期，其价值在于，如果 JobManager Pod 崩溃，会自动重新创建一个新的 JobManager Pod 来替代它，从而保证了 JobManager 的高可用性，裸 Pod 崩溃后不会自动重建。但是 TaskManager 使用的是裸 Pod（即直接创建 Pod），因为 TM 的生命周期由 Flink 的 <code>KubernetesResourceManagerDriver</code> 主动管理，不需要 K8s 的自动重建机制。</p>
+<p>被动 RM 和主动 RM 的核心区别在于是否主动管理 TM 的生命周期。被动 RM 是指被动等待 TaskManager 来注册，自己不创建也不销毁 TM，TM 的数量在部署时静态决定。主动 RM 则是根据 <code>SlotManager</code> 声明的资源需求，主动创建 TM（Pod），在 Slot 释放后主动销毁 TM，实现弹性伸缩。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文梳理了 K8s 部署模式下 Flink 1.18 集群的启动流程，包括启动脚本、<code>KubernetesSessionCli</code> 的作用、JM 的启动流程、TM 的启动流程以及与 Standalone 部署模式的区别。</p>
+
+                    
+                </div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Flink/">Flink</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/posts/flink-cluster-startup-process/"
+                                   title="Flink 集群启动的过程"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Flink 集群启动的过程</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC"><span class="nav-text">一、启动脚本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81KubernetesSessionCli"><span class="nav-text">二、KubernetesSessionCli</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81JobManager-%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-text">三、JobManager 的启动流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81TaskManager-%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-text">四、TaskManager 的启动流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E4%B8%8E-Standalone-%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-text">五、与 Standalone 模式的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2025</span>&nbsp;-&nbsp;2026
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">Shen Huanglin</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%90%AF%E5%8A%A8%E8%84%9A%E6%9C%AC"><span class="nav-text">一、启动脚本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81KubernetesSessionCli"><span class="nav-text">二、KubernetesSessionCli</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89%E3%80%81JobManager-%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-text">三、JobManager 的启动流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B%E3%80%81TaskManager-%E7%9A%84%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B"><span class="nav-text">四、TaskManager 的启动流程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%94%E3%80%81%E4%B8%8E-Standalone-%E6%A8%A1%E5%BC%8F%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-text">五、与 Standalone 模式的区别</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+
+<!-- lazyload -->
+
+    
+<script src="/js/lazyload.js"></script>
+
+
+
+<div class="">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+
+
+</body>
+</html>
