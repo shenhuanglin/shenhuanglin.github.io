@@ -191,7 +191,7 @@
             
                 <span class="meta-info-item post-update-date" style="display: none;" >
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Tue Apr 28 2026 01:11:21 GMT+0800">2026 年 04 月 28 日</span>
+                    <span class="datetime" data-updated="Thu May 07 2026 15:44:29 GMT+0800">2026 年 05 月 07 日</span>
                 </span>
             
         
@@ -259,6 +259,16 @@
 <p>获取到执行环境后，就要构建 StreamGraph 的数据流入口，即 Source，在 Flink 1.18 版本中，官方推荐使用 <code>StreamExecutionEnvironment</code> 中的 <code>fromSource</code> 方法，该方法用于定义从哪个数据源读取以及使用的 Watermark 策略，然后返回一个 <code>DataStreamSource</code>，作为整个作业的流式拓扑结构的逻辑起点。</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;OUT&gt; DataStreamSource&lt;OUT&gt; <span class="title function_">fromSource</span><span class="params">(</span></span><br><span class="line"><span class="params">        Source&lt;OUT, ?, ?&gt; source,</span></span><br><span class="line"><span class="params">        WatermarkStrategy&lt;OUT&gt; timestampsAndWatermarks,</span></span><br><span class="line"><span class="params">        String sourceName,</span></span><br><span class="line"><span class="params">        TypeInformation&lt;OUT&gt; typeInfo)</span> &#123;</span><br><span class="line">    <span class="comment">// 获取输出数据类型</span></span><br><span class="line">    <span class="keyword">final</span> TypeInformation&lt;OUT&gt; resolvedTypeInfo =</span><br><span class="line">            getTypeInfo(source, sourceName, Source.class, typeInfo);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">DataStreamSource</span>&lt;&gt;(</span><br><span class="line">            <span class="built_in">this</span>,</span><br><span class="line">            checkNotNull(source, <span class="string">&quot;source&quot;</span>),</span><br><span class="line">            checkNotNull(timestampsAndWatermarks, <span class="string">&quot;timestampsAndWatermarks&quot;</span>),</span><br><span class="line">            checkNotNull(resolvedTypeInfo),</span><br><span class="line">            checkNotNull(sourceName));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<blockquote>
+<p>注：<code>CliFrontend</code>是 Flink 命令行工具 <code>./bin/flink</code> 的核心实现类，负责解析用户输入的命令行参数，构建程序的执行环境，并将程序提交到集群上执行，是用户与 Flink 集群交互的客户端入口。纯客户端进程，不参与 Job 的实际执行，只负责解析命令、与集群通信、提交&#x2F;管理 Job。<code>./bin/flink</code> 脚本直接启动一个 JVM 进程，将所有参数传递给 <code>CliFrontend</code> 的 <code>main</code> 方法。客户端进程负责以下工作</p>
+<ul>
+<li>执行用户的 main 方法，从中提取 Flink 能够理解的数据流图（JobGraph）。</li>
+<li>下载用户程序依赖的 Jar 包和资源文件，并上传到集群。</li>
+<li>将 JobGraph 通过 REST API 提交到集群的 JobManager 进行调度和执行。</li>
+<li>提交完成后，可以断开连接（Detached 模式）或保持连接接收进度报告（Attached 模式）。</li>
+</ul>
+<p>客户端进程是重量级的，由此催生了 Application 模式的产生，在该模式下，客户端仅需解析命令行参数，如 <code>./bin/flink run -t kubernetes-application ./xx.jar</code>，然后将 jar 路径、入口类、动态参数等写入配置，提交给集群，触发创建一个包含作业 Jar 包的 JM Pod，提交完成后立即退出。<code>main</code> 方法在 JM 上执行，JobGraph 在 JM 中生成，不需要客户端下载依赖，执行 <code>main</code>、上传 Jar。</p>
+</blockquote>
 <h2 id="二、Transformation"><a href="#二、Transformation" class="headerlink" title="二、Transformation"></a>二、Transformation</h2><p>Flink 中，每个会导致“计算”或“数据分发”改变的操作都会生成一个 <code>Transformation</code>，而其中的物理算子（Physical Transformation）则会被添加到 <code>List&lt;Transformation&lt;?&gt;&gt; transformations</code>中。以 <code>map</code> 操作为例</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;R&gt; SingleOutputStreamOperator&lt;R&gt; <span class="title function_">map</span><span class="params">(</span></span><br><span class="line"><span class="params">        MapFunction&lt;T, R&gt; mapper, TypeInformation&lt;R&gt; outputType)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> transform(<span class="string">&quot;Map&quot;</span>, outputType, <span class="keyword">new</span> <span class="title class_">StreamMap</span>&lt;&gt;(clean(mapper)));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
