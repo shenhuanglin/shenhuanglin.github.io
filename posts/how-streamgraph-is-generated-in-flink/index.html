@@ -191,7 +191,7 @@
             
                 <span class="meta-info-item post-update-date" style="display: none;" >
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Thu May 07 2026 15:48:10 GMT+0800">2026 年 05 月 07 日</span>
+                    <span class="datetime" data-updated="Thu May 07 2026 17:11:19 GMT+0800">2026 年 05 月 07 日</span>
                 </span>
             
         
@@ -267,9 +267,9 @@
 <li>将 JobGraph 通过 REST API 提交到集群的 JobManager 进行调度和执行。</li>
 <li>提交完成后，可以断开连接（Detached 模式）或保持连接接收进度报告（Attached 模式）。</li>
 </ul>
-<p>客户端进程是重量级的，由此催生了 Application 模式的产生，在该模式下，客户端仅需解析命令行参数，如 <code>./bin/flink run -t kubernetes-application ./xx.jar</code>，然后将 jar 路径、入口类、动态参数等写入配置，提交给集群，触发创建一个包含作业 Jar 包的 JM Pod，提交完成后立即退出。<code>main</code> 方法在 JM 上执行，JobGraph 在 JM 中生成，不需要客户端下载依赖，执行 <code>main</code>、上传 Jar。</p>
+<p>客户端进程是重量级的，由此催生了 Application 模式的产生，在该模式下，客户端仅需解析命令行参数，如 <code>./bin/flink run -t kubernetes-application ./xx.jar</code>，然后将 jar 路径、入口类、动态参数等写入配置，提交给集群，触发创建一个包含作业 Jar 包的 JM Pod，提交完成后立即退出。<code>main</code> 方法在 JM 上执行，JobGraph 在 JM 中生成，不需要客户端下载依赖，执行 <code>main</code> 方法、上传 Jar 包。</p>
 </blockquote>
-<h2 id="二、Transformation"><a href="#二、Transformation" class="headerlink" title="二、Transformation"></a>二、Transformation</h2><p>Flink 中，每个会导致“计算”或“数据分发”改变的操作都会生成一个 <code>Transformation</code>，而其中的物理算子（Physical Transformation）则会被添加到 <code>List&lt;Transformation&lt;?&gt;&gt; transformations</code>中。以 <code>map</code> 操作为例</p>
+<h2 id="二、Transformation"><a href="#二、Transformation" class="headerlink" title="二、Transformation"></a>二、Transformation</h2><p>Flink 中，每个会导致“计算”或“数据分发”改变的操作都会生成一个 <code>Transformation</code>，而其中的物理算子（Physical Transformation）则会被添加到 <code>List&lt;Transformation&lt;?&gt;&gt; transformations</code> 中。以 <code>map</code> 操作为例</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> &lt;R&gt; SingleOutputStreamOperator&lt;R&gt; <span class="title function_">map</span><span class="params">(</span></span><br><span class="line"><span class="params">        MapFunction&lt;T, R&gt; mapper, TypeInformation&lt;R&gt; outputType)</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> transform(<span class="string">&quot;Map&quot;</span>, outputType, <span class="keyword">new</span> <span class="title class_">StreamMap</span>&lt;&gt;(clean(mapper)));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>其内部调用了 <code>transform</code> 方法，而后者又调用了 <code>doTransform</code> 方法，该方法的作用是创建一个新的逻辑节点（<code>Transformation</code>），将其挂载到上游节点之后，并注册到执行环境中</p>
