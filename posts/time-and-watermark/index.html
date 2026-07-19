@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="Hexo Theme Keep">
+    <meta name="description" content="Hexo Theme Keep">
+    <meta name="author" content="Shen Huanglin">
+    
+    <title>
+        
+            时间和 Watermark |
+        
+        Go For It !
+    </title>
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    
+        <link rel="shortcut icon" href="/images/favicon.png">
+    
+    
+<link rel="stylesheet" href="/font/css/fontawesome.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/regular.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/solid.min.css">
+
+    
+<link rel="stylesheet" href="/font/css/brands.min.css">
+
+    
+    <script class="keep-theme-configurations">
+    const KEEP = window.KEEP || {}
+    KEEP.hexo_config = {"hostname":"shenhuanglin.github.io","root":"/","language":"zh-CN"}
+    KEEP.theme_config = {"base_info":{"primary_color":"#757485","title":"Go For It !","author":"Shen Huanglin","avatar":"/images/touxiang.jpg","favicon":"/images/favicon.png"},"menu":{"home":"/","archives":"/archives"},"first_screen":{"enable":true,"background_img":"/images/bg.svg","background_img_dark":"/images/bg.svg","description":"Keep writing and Keep loving.","hitokoto":true},"social_contact":{"enable":false,"links":{"github":null,"weixin":null,"qq":null,"weibo":null,"zhihu":null,"twitter":null,"x":null,"facebook":null,"email":null}},"scroll":{"progress_bar":true,"percent":true,"hide_header":true},"home":{"announcement":null,"category":true,"tag":false,"post_datetime":"created"},"post":{"author_badge":{"enable":false,"level_badge":false,"custom_badge":["One","Two","Three"]},"word_count":{"wordcount":false,"min2read":false},"datetime_format":"YYYY 年 MM 月 DD 日","copyright_info":false,"share":false,"reward":{"enable":false,"img_link":null,"text":null,"icon":null}},"code_block":{"tools":{"enable":true,"style":"mac"},"highlight_theme":"default"},"toc":{"enable":true,"number":false,"expand_all":false,"init_open":true,"layout":"right"},"website_count":{"busuanzi_count":{"enable":false,"site_uv":false,"site_pv":true,"page_pv":true}},"local_search":{"enable":false,"preload":false},"comment":{"enable":false,"use":"valine","valine":{"appid":null,"appkey":null,"server_urls":null,"placeholder":null},"gitalk":{"github_id":null,"github_admins":null,"repository":null,"client_id":null,"client_secret":null,"proxy":null},"twikoo":{"env_id":null,"region":null,"version":"1.6.39"},"waline":{"server_url":null,"reaction":false,"version":"3.3.2"},"giscus":{"repo":null,"repo_id":null,"category":"Announcements","category_id":null,"reactions_enabled":false},"artalk":{"server":null},"disqus":{"shortname":null}},"rss":{"enable":false},"lazyload":{"enable":true},"cdn":{"enable":false,"provider":"cdnjs"},"pjax":{"enable":false},"footer":{"since":2025,"word_count":false,"site_deploy":{"enable":false,"provider":"github","url":null},"record":{"enable":false,"list":[{"code":null,"link":null}]}},"inject":{"enable":false,"css":[null],"js":[null]},"root":"","source_data":{},"version":"4.2.5"}
+    KEEP.language_ago = {"second":"%s 秒前","minute":"%s 分钟前","hour":"%s 小时前","day":"%s 天前","week":"%s 周前","month":"%s 个月前","year":"%s 年前"}
+    KEEP.language_code_block = {"copy":"复制代码","copied":"已复制","fold":"折叠代码块","folded":"已折叠"}
+    KEEP.language_copy_copyright = {"copy":"复制版权信息","copied":"已复制","title":"原文标题","author":"原文作者","link":"原文链接"}
+  </script>
+<meta name="generator" content="Hexo 5.4.2"></head>
+
+
+<body>
+<div class="progress-bar-container">
+    
+        <span class="scroll-progress-bar"></span>
+    
+
+    
+</div>
+
+
+
+<main class="page-container border-box">
+    <!-- home first screen  -->
+    
+
+    <!-- page content -->
+    <div class="page-main-content border-box">
+        <div class="page-main-content-top">
+            
+<header class="header-wrapper">
+
+    <div class="border-box header-content">
+        <div class="left flex-start border-box">
+            
+            <a class="site-name border-box" href="/">
+               Go For It !
+            </a>
+        </div>
+
+        <div class="right border-box">
+            <div class="pc border-box">
+                <ul class="menu-list border-box">
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/">
+                                
+                                首页
+                                
+                            </a>
+                            
+                        </li>
+                    
+                        
+                        <li class="menu-item flex-start border-box">
+                            <a class="menu-text-color border-box" href="/archives">
+                                
+                                归档
+                                
+                            </a>
+                            
+                        </li>
+                    
+                    
+                </ul>
+            </div>
+            <div class="mobile border-box flex-start">
+                
+                <div class="icon-item menu-bar">
+                    <div class="menu-bar-middle"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-drawer">
+        <ul class="drawer-menu-list border-box">
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/">
+                            
+                            首页
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+                
+                <li class="drawer-menu-item border-box not-sub-menu">
+                    <label class="drawer-menu-label border-box">
+                        <a class="drawer-menu-text-color left-side flex-start border-box" href="/archives">
+                            
+                            归档
+                        </a>
+                        
+                    </label>
+                    
+                </li>
+            
+        </ul>
+    </div>
+
+    <div class="window-mask"></div>
+
+</header>
+
+
+        </div>
+
+        <div class="page-main-content-middle border-box">
+
+            <div class="main-content border-box">
+                
+
+                    
+<div class="fade-in-down-animation">
+    <div class="post-page-container border-box">
+        <div class="post-content-container border-box">
+            
+
+            <div class="post-content-bottom border-box">
+                
+                    <div class="post-title">
+                        时间和 Watermark
+                    </div>
+                
+
+                
+                    <div class="post-header border-box">
+                        
+                            <div class="avatar-box border-box">
+                                <img src="/images/touxiang.jpg">
+                            </div>
+                        
+                        <div class="info-box">
+                            <div class="author border-box">
+                                <span class="name">Shen Huanglin</span>
+                                
+                            </div>
+                            <div class="meta-info border-box">
+                                
+
+<div class="post-meta-info-container border-box post">
+    <div class="post-meta-info border-box">
+        
+
+        
+            <span class="meta-info-item post-create-date">
+                <i class="icon fa-solid fa-calendar-plus"></i>&nbsp;
+                <span class="datetime">2026 年 07 月 20 日</span>
+            </span>
+
+            
+                <span class="meta-info-item post-update-date" style="display: none;" >
+                    <i class="icon fa-solid fa-file-pen"></i>&nbsp;
+                    <span class="datetime" data-updated="Mon Jul 20 2026 00:32:14 GMT+0800">2026 年 07 月 20 日</span>
+                </span>
+            
+        
+
+        
+
+        
+            <span class="post-tag meta-info-item border-box">
+                <ul class="post-tag-ul">
+                    
+                            <li class="tag-item"><span class="tag-separator"><i class="icon fas fa-hashtag"></i></span><a href="/tags/Flink/">Flink</a></li>
+                        
+                    
+                </ul>
+            </span>
+        
+
+        
+        
+        
+        
+    </div>
+
+    
+</div>
+
+                            </div>
+                        </div>
+                    </div>
+                
+
+                <div class="post-content keep-markdown-body ">
+                    
+
+                    
+                         <h2 id="一、时间语义"><a href="#一、时间语义" class="headerlink" title="一、时间语义"></a>一、时间语义</h2><p>Flink 支持三种时间语义，分别是</p>
+<ol>
+<li><strong>Event Time（事件时间）</strong>：事件实际发生的时间。</li>
+<li><strong>Ingestion Time（摄入时间）</strong>：数据进入 <strong>Source 算子</strong>的时间。</li>
+<li><strong>Processing Time（处理时间）</strong>：数据被具体算子处理时的机器时间。</li>
+</ol>
+<p>在实际应用中，事件时间更能反映真实的事件发生顺序，因此从 1.12 版本开始，Flink 将<strong>事件时间</strong>作为默认的时间语义。</p>
+<h2 id="二、Watermark"><a href="#二、Watermark" class="headerlink" title="二、Watermark"></a>二、Watermark</h2><h3 id="2-1-定义"><a href="#2-1-定义" class="headerlink" title="2.1 定义"></a>2.1 定义</h3><p>在 Flink 中，用于<strong>衡量事件时间进展</strong>的标记，被称为水位线（Watermark），它是一种用于<strong>定义”何时停止等待更早的事件”<strong>的机制，用于告知算子“时间已经推进到某个点，<strong>不会再有时间戳 $\le$ 该值的数据到达”</strong>。在具体实现上，它是</strong>由 Source 算子生成的，插入到数据流中的一条携带时间戳的特殊的数据记录</strong>。</p>
+<p>在 Flink 中，有两个 Watermark 类，分别是</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 继承 StreamElement 意味着和普通数据记录（StreamRecord）、延迟标记（LatencyMarker）等一样，都是在</span></span><br><span class="line"><span class="comment">// 流中传输的数据元素</span></span><br><span class="line"><span class="meta">@PublicEvolving</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Watermark</span> <span class="keyword">extends</span> <span class="title class_">StreamElement</span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Public</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Watermark</span> <span class="keyword">implements</span> <span class="title class_">Serializable</span> &#123;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>用户实现 <code>WatermarkGenerator</code> 时使用后者，即 <code>onPeriodicEmit</code> 方法中发送的是该 <code>Watermark</code>，Flink 内部将其放入流中传输时，使用前者。算子对 Watermark 的处理规则是，对于不缓冲元素的算子（如 <code>map</code>、<code>filter</code>），直接将接收到的 Watermark 转发给下游，对于缓冲元素的算子（如窗口算子），<strong>必须先触发窗口计算、输出结果，然后再发送 Watermark</strong>，<strong>保证了下游算子收到 Watermark 时，上游已经完成了所有应该触发的计算</strong>。</p>
+<blockquote>
+<p>注：这是一个典型的防止循环依赖的分层设计，用户 API 保持轻量，运行时内部实现保持独立，两者通过适配器 <code>WatermarkToDataOutput</code> 在边界处转换。</p>
+</blockquote>
+<h3 id="2-2-作用"><a href="#2-2-作用" class="headerlink" title="2.2 作用"></a>2.2 作用</h3><p>在 Flink 中，Watermark 的<strong>主要作用包括</strong></p>
+<ol>
+<li>驱动 Event Time 推进：告知下游算子事件时间已经推进到某个点。</li>
+<li><strong>触发窗口计算</strong>：<code>EventTimeTrigger</code> 在 Watermark 超过窗口结束时间时触发。</li>
+<li>触发 Event Time Timer：<code>InternalTimerService</code> 在 Watermark 推进时触发注册的定时器。</li>
+<li>处理乱序数据：通过延迟 Watermark 容忍一定程度的乱序。</li>
+<li>多流对齐：多输入算子取所有上游 Watermark 的最小值，保证全局一致性。</li>
+</ol>
+<p><strong>窗口用于在无界的流数据中实现有界的计算</strong>，它<strong>将流切分成有限大小的多个“存储桶”（bucket）</strong>，<strong>每条数据会分发到对应的桶中，当 Watermark 超过窗口结束时间时，就对每个桶中收集的数据进行计算处理</strong>，并将窗口关闭销毁。<strong>Watermark 触发窗口计算需要满足以下两个条件</strong></p>
+<ol>
+<li>Watermark 的时间戳 $\ge$ 窗口的结束时间；</li>
+<li>窗口中有数据。</li>
+</ol>
+<h3 id="2-3-生成-Watermark"><a href="#2-3-生成-Watermark" class="headerlink" title="2.3 生成 Watermark"></a>2.3 生成 Watermark</h3><p>Flink 中生成 Watermark 的核心是 <code>WatermarkStrategy</code>，它是一个顶层接口，同时继承了 <code>TimestampAssignerSupplier</code> 和 <code>WatermarkGeneratorSupplier</code> 两个接口，前者定义了提取事件时间的方法，后者定义了生成 Watermark 的方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">WatermarkStrategy</span>&lt;T&gt; <span class="keyword">extends</span> <span class="title class_">TimestampAssignerSupplier</span>&lt;T&gt;, WatermarkGeneratorSupplier&lt;T&gt; &#123;  </span><br><span class="line">    <span class="comment">/** 根据策略实例化一个时间戳分配器 */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">default</span> TimestampAssigner&lt;T&gt; <span class="title function_">createTimestampAssigner</span><span class="params">(</span></span><br><span class="line"><span class="params">            TimestampAssignerSupplier.Context context)</span> &#123;</span><br><span class="line">        <span class="comment">// By default, this is &#123;@link RecordTimestampAssigner&#125;,</span></span><br><span class="line">        <span class="comment">// for cases where records come out of a source with valid timestamps, for example from</span></span><br><span class="line">        <span class="comment">// Kafka.</span></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">RecordTimestampAssigner</span>&lt;&gt;();</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/** 根据策略实例化一个 Watermark 生成器 */</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    WatermarkGenerator&lt;T&gt; <span class="title function_">createWatermarkGenerator</span><span class="params">(WatermarkGeneratorSupplier.Context context)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中，<code>WatermarkGenerator</code> 中有两个方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Public</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">WatermarkGenerator</span>&lt;T&gt; &#123;</span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Called for every event, allows the watermark generator to examine and remember the event</span></span><br><span class="line"><span class="comment">     * timestamps, or to emit a watermark based on the event itself.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">onEvent</span><span class="params">(T event, <span class="type">long</span> eventTimestamp, WatermarkOutput output)</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * Called periodically, and might emit a new watermark, or not.</span></span><br><span class="line"><span class="comment">     *</span></span><br><span class="line"><span class="comment">     * &lt;p&gt;The interval in which this method is called and Watermarks are generated depends on &#123;<span class="doctag">@link</span></span></span><br><span class="line"><span class="comment">     * ExecutionConfig#getAutoWatermarkInterval()&#125;.</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">void</span> <span class="title function_">onPeriodicEmit</span><span class="params">(WatermarkOutput output)</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>每接收到一条数据调用一次 <code>onEvent</code> 方法，记录最大事件时间，周期性调用 <code>onPeriodicEmit</code> 方法，发送 Watermark，发送间隔（默认 200 $ms$）由 <code>ExecutionConfig.setAutoWatermarkInterval</code> 方法控制。</p>
+<blockquote>
+<p>注：每条数据都发送 Watermark 会导致性能下降，因为每个 Watermark 都会触发下游计算。</p>
+</blockquote>
+<p>Flink 有以下内置的 <code>WatermarkGenerator</code></p>
+<ol>
+<li><p><code>BoundedOutOfOrdernessWatermarks</code>：<strong>生产环境中最常用的 Watermark 生成器</strong>，<strong>允许数据有一定的“延迟”空间</strong>，生成的 Watermark 中的时间戳总是滞后于提取到的最大事件时间的一个固定时间间隔。对应的策略是 <code>WatermarkStrategy.forBoundedOutOfOrderness(Duration delay)</code>。假设滞后 3 秒</p>
+ <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">WatermarkStrategy.forBoundedOutOfOrderness(Duration.ofSeconds(<span class="number">3</span>));</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>AscendingTimestampsWatermarks</code>：Watermark 的时间戳总是等于当前提取到的最大事件时间减 1 秒，本质上是 <code>BoundedOutOfOrdernessWatermarks</code> 延迟时间为 0 的一种特殊表现，适用于事件时间严格升序到达的场景。对应的策略是 <code>WatermarkStrategy.forMonotonousTimestamps()</code>。</p>
+</li>
+<li><p><code>NoWatermarksGenerator</code>：不生成 Watermark，对应的策略是 <code>WatermarkStrategy.noWatermarks()</code>。</p>
+</li>
+</ol>
+<p>上述策略主要是<strong>周期性生成</strong>，但是在 Flink 的 <code>WatermarkGenerator</code> 接口定义中，允许两种触发模式，分别是<strong>周期性生成</strong>和<strong>标记生成</strong>，后者是指在 <code>onEvent</code> 方法中检测到特殊标记事件时，立即发出 Watermark，不依赖周期性调用，具体的需求逻辑仅需实现 <code>WatermarkGenerator</code> 接口并重写 <code>onEvent</code> 方法和 <code>onPeriodicEmit</code> 方法即可。</p>
+<h3 id="2-4-Watermark-处理流程"><a href="#2-4-Watermark-处理流程" class="headerlink" title="2.4 Watermark 处理流程"></a>2.4 Watermark 处理流程</h3><h4 id="2-4-1-初始化"><a href="#2-4-1-初始化" class="headerlink" title="2.4.1 初始化"></a>2.4.1 初始化</h4><p>在定义 Watermark 时会调用 <code>assignTimestampsAndWatermarks</code> 方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> SingleOutputStreamOperator&lt;T&gt; <span class="title function_">assignTimestampsAndWatermarks</span><span class="params">(</span></span><br><span class="line"><span class="params">        WatermarkStrategy&lt;T&gt; watermarkStrategy)</span> &#123;</span><br><span class="line">    <span class="keyword">final</span> WatermarkStrategy&lt;T&gt; cleanedStrategy = clean(watermarkStrategy);</span><br><span class="line">    <span class="comment">// 并行度强制匹配上游，确保 Source 和 Watermark 算子时 1:1 的关系，可以 Chain 在一起</span></span><br><span class="line">    <span class="keyword">final</span> <span class="type">int</span> <span class="variable">inputParallelism</span> <span class="operator">=</span> getTransformation().getParallelism();</span><br><span class="line">    <span class="comment">// 物理 Transformation，包含了用户的 WatermarkStrategy 和上游 Transformation，在执行计划中被转换为</span></span><br><span class="line">    <span class="comment">// 实际的 TimestampsAndWatermarksOperator</span></span><br><span class="line">    <span class="keyword">final</span> TimestampsAndWatermarksTransformation&lt;T&gt; transformation =</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">TimestampsAndWatermarksTransformation</span>&lt;&gt;(</span><br><span class="line">                    <span class="string">&quot;Timestamps/Watermarks&quot;</span>,</span><br><span class="line">                    inputParallelism,</span><br><span class="line">                    getTransformation(),</span><br><span class="line">                    cleanedStrategy,</span><br><span class="line">                    <span class="literal">false</span>);</span><br><span class="line">    getExecutionEnvironment().addOperator(transformation);</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">SingleOutputStreamOperator</span>&lt;&gt;(getExecutionEnvironment(), transformation);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>该方法接收了一个 <code>WatermarkStrategy</code> 参数，将其封装到 <code>TimestampsAndWatermarksTransformation</code> 后，被添加到 <code>transformations</code> 列表中，在生成 StreamGraph 的过程中，会根据 Transformation 类型调用相应的 <code>translateForStreamingInternal</code> 方法。</p>
+<img    
+                       lazyload
+                       alt="image"
+                       data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260709003554463.png"
+                         style="zoom:40%;" 
+                 >
+
+<p>在 <code>TimestampsAndWatermarksTransformationTranslator</code> 的 <code>translateInternal</code> 方法中，创建了 <code>TimestampsAndWatermarksOperator</code> 并调用其 <code>open</code> 方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">open</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="built_in">super</span>.open();</span><br><span class="line"></span><br><span class="line">    timestampAssigner = watermarkStrategy.createTimestampAssigner(<span class="built_in">this</span>::getMetricGroup);</span><br><span class="line">    watermarkGenerator =</span><br><span class="line">            emitProgressiveWatermarks</span><br><span class="line">                    <span class="comment">// 流模式</span></span><br><span class="line">                    ? watermarkStrategy.createWatermarkGenerator(<span class="built_in">this</span>::getMetricGroup)</span><br><span class="line">                    <span class="comment">// 批模式</span></span><br><span class="line">                    : <span class="keyword">new</span> <span class="title class_">NoWatermarksGenerator</span>&lt;&gt;();</span><br><span class="line"></span><br><span class="line">    wmOutput = <span class="keyword">new</span> <span class="title class_">WatermarkEmitter</span>(output);</span><br><span class="line"></span><br><span class="line">    watermarkInterval = getExecutionConfig().getAutoWatermarkInterval();</span><br><span class="line">    <span class="keyword">if</span> (watermarkInterval &gt; <span class="number">0</span> &amp;&amp; emitProgressiveWatermarks) &#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">long</span> <span class="variable">now</span> <span class="operator">=</span> getProcessingTimeService().getCurrentProcessingTime();</span><br><span class="line">        <span class="comment">// 注册定时器，在指定时间调用 onProcessingTime 方法</span></span><br><span class="line">        getProcessingTimeService().registerTimer(now + watermarkInterval, <span class="built_in">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>该方法主要用于生成 <code>timestampAssigner</code> 和 <code>watermarkGenerator</code>，前者用于提取时间戳，后者用于生成 Watermark。而后注册一个定时器，到达指定时间后会调用 <code>onProcessingTime</code> 方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onProcessingTime</span><span class="params">(<span class="type">long</span> timestamp)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="comment">// 周期性生成 Watermark</span></span><br><span class="line">    watermarkGenerator.onPeriodicEmit(wmOutput);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">final</span> <span class="type">long</span> <span class="variable">now</span> <span class="operator">=</span> getProcessingTimeService().getCurrentProcessingTime();</span><br><span class="line">    getProcessingTimeService().registerTimer(now + watermarkInterval, <span class="built_in">this</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>该方法用于触发生成 Watermark 并再次启动一个定时器。</p>
+<p><code>WatermarkEmitter</code> 是 <code>WatermarkOutput</code> 的实现类，当调用 <code>watermarkGenerator</code> 的 <code>onPeriodicEmit</code> 方法时，实际调用的是 <code>WatermarkEmitter</code> 的 <code>emitWatermark</code> 方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">emitWatermark</span><span class="params">(Watermark watermark)</span> &#123;</span><br><span class="line">    <span class="keyword">final</span> <span class="type">long</span> <span class="variable">ts</span> <span class="operator">=</span> watermark.getTimestamp();</span><br><span class="line">    <span class="comment">// 保证单调递增</span></span><br><span class="line">    <span class="keyword">if</span> (ts &lt;= currentWatermark) &#123;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    currentWatermark = ts;</span><br><span class="line"></span><br><span class="line">    markActive();</span><br><span class="line">    <span class="comment">// 实际注入流的是 org.apache.flink.streaming.api.watermark.Watermark，</span></span><br><span class="line">    <span class="comment">// 而不是 org.apache.flink.api.common.eventtime.Watermark</span></span><br><span class="line">    output.emitWatermark(<span class="keyword">new</span> <span class="title class_">org</span>.apache.flink.streaming.api.watermark.Watermark(ts));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其保证了 Watermark 的时间戳是单调递增的。</p>
+<h4 id="2-4-2-发出-Watermark"><a href="#2-4-2-发出-Watermark" class="headerlink" title="2.4.2 发出 Watermark"></a>2.4.2 发出 Watermark</h4><p>对于 <code>BoundedOutOfOrdernessWatermarks</code>，它向下游发送一个 Watermark，时间戳为 <code>maxTimestamp - outOfOrdernessMillis - 1</code>。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">onPeriodicEmit</span><span class="params">(WatermarkOutput output)</span> &#123;</span><br><span class="line">    <span class="comment">// Watermark(t) 意味着时间戳 ≤ t 的数据已经全部到达，不会再有更早的数据，如果截止当前的最大时间戳为</span></span><br><span class="line">    <span class="comment">// maxTimestamp，允许的最大延迟为 outOfOrdernessMillis，则可以确定时间戳</span></span><br><span class="line">    <span class="comment">// ≤ m - o - 1 已经全部到达，但是时间戳恰好等于 m - o 的事件仍可能到来，所以只能发送时间戳为 m - o - 1</span></span><br><span class="line">    <span class="comment">// 的 Watermark，否则会导致在时间戳为 m - o 的数据未全部到齐就触发窗口计算</span></span><br><span class="line">    output.emitWatermark(<span class="keyword">new</span> <span class="title class_">Watermark</span>(maxTimestamp - outOfOrdernessMillis - <span class="number">1</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-4-3-下游处理"><a href="#2-4-3-下游处理" class="headerlink" title="2.4.3 下游处理"></a>2.4.3 下游处理</h4><img    
+                       lazyload
+                       alt="image"
+                       data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260720002717895.png"
+                         style="zoom:40%;" 
+                 >
+
+<p>下游输入的入口通常是 <code>StreamTask.processInput</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">DataInputStatus</span> <span class="variable">status</span> <span class="operator">=</span> inputProcessor.processInput();</span><br></pre></td></tr></table></figure>
+
+<p>对于 One-Input Task 则是 <code>StreamOneInputProcessor</code></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> DataInputStatus <span class="title function_">processInput</span><span class="params">()</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">DataInputStatus</span> <span class="variable">status</span> <span class="operator">=</span> input.emitNext(output);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (status == DataInputStatus.END_OF_DATA) &#123;</span><br><span class="line">        endOfInputAware.endInput(input.getInputIndex() + <span class="number">1</span>);</span><br><span class="line">        output = <span class="keyword">new</span> <span class="title class_">FinishedDataOutput</span>&lt;&gt;();</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (status == DataInputStatus.END_OF_RECOVERY) &#123;</span><br><span class="line">        <span class="keyword">if</span> (input <span class="keyword">instanceof</span> RecoverableStreamTaskInput) &#123;</span><br><span class="line">            input = ((RecoverableStreamTaskInput&lt;IN&gt;) input).finishRecovery();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> DataInputStatus.MORE_AVAILABLE;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> status;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>调用的实际是 <code>AbstractStreamTaskNetworkInput</code> 的 <code>emitNext</code> 方法，核心逻辑是</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">result = currentRecordDeserializer.getNextRecord(deserializationDelegate);</span><br><span class="line"><span class="keyword">if</span> (result.isFullRecord()) &#123;</span><br><span class="line">    processElement(deserializationDelegate.getInstance(), output);</span><br><span class="line">    <span class="keyword">if</span> (canEmitBatchOfRecords.check()) &#123;</span><br><span class="line">        <span class="keyword">continue</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> DataInputStatus.MORE_AVAILABLE;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>反序列化出来的统一类型是 <code>StreamElement</code>，他可能是 <code>StreamRecord</code>、<code>Watermark</code>、<code>WatermarkStatus</code>、<code>LatencyMarker</code>，然后进入 <code>AbstractStreamTaskNetworkInput.processElement</code> 进行分发</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** 网络输入读取到不同的 StreamElement 后进行分发 */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">processElement</span><span class="params">(StreamElement recordOrMark, DataOutput&lt;T&gt; output)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="keyword">if</span> (recordOrMark.isRecord()) &#123;</span><br><span class="line">        output.emitRecord(recordOrMark.asRecord());</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (recordOrMark.isWatermark()) &#123;</span><br><span class="line">        statusWatermarkValve.inputWatermark(</span><br><span class="line">                recordOrMark.asWatermark(), flattenedChannelIndices.get(lastChannel), output);</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (recordOrMark.isLatencyMarker()) &#123;</span><br><span class="line">        output.emitLatencyMarker(recordOrMark.asLatencyMarker());</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (recordOrMark.isWatermarkStatus()) &#123;</span><br><span class="line">        statusWatermarkValve.inputWatermarkStatus(</span><br><span class="line">                recordOrMark.asWatermarkStatus(),</span><br><span class="line">                flattenedChannelIndices.get(lastChannel),</span><br><span class="line">                output);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="title class_">UnsupportedOperationException</span>(<span class="string">&quot;Unknown type of StreamElement&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>当下游收到 Watermark 时，先交给 <code>StatusWatermarkValve</code>。算子可能有多个上游并行子任务（多个 Input Channel），每个 Channel 独立发送 Watermark，算子必须读取所有 Active &amp; Aligned  Channel 的最小值才能向下游推进。以上逻辑通过 <code>StatusWatermarkValve</code> 实现，它负责</p>
+<ol>
+<li>记录每个输入 Channel 的 Watermark  ACTIVE&#x2F;IDLE 状态；</li>
+<li>从有效的 Channel 中取最小的 Watermark；</li>
+<li>保证向下游输入的 Watermark 单调递增；</li>
+<li>排除 IDLE 的 Channel；</li>
+<li>防止刚从 IDLE 恢复，但是 Watermark 落后的 Channel 将整体的 Watermark 拉回去。</li>
+</ol>
+<p>Aligned Channel 是指该 Channel 的 Watermark 已经赶上了 Valve 的输出进度，有资格参与最小 Watermark 的计算。一个 Channel 不 Aligned 只有两种情况：</p>
+<ol>
+<li>Channel 当前是 IDLE。</li>
+<li>Channel 从 IDLE 恢复为 ACTIVE，但是它的 Watermark 还没有追上 <code>lastOutputWatermark</code>。</li>
+</ol>
+<p>Channel ACTIVE &#x2F; IDLE 表示该 Channel 是否还继续产生数据 &#x2F; Watermark，下游计算 Watermark 时是否要等待它，通过接收上游显式发送 <code>WatermarkStatus.IDLE</code> 或者 <code>WatermarkStatus.ACTIVE</code> 进行判断。最上游的 ACTIVE &#x2F; IDLE 的判断依据是 <code>WatermarkStrategy.withIdleness(Duration)</code>，当某个 Source 子任务超过指定时间没有收到数据，则将其标记为 IDLE，使其暂时不参与下游 Watermark 的最小值计算。</p>
+<blockquote>
+<p>Channel 与 SubPartition 的关系：在 Flink 中，这两个分别属于生产者侧和消费者侧，是一对多的关系。上游算子的每个并行子任务产出一个 <code>ResultPartition</code>，其中包含多个 <code>ResultSubpartition</code>，每个 <code>ResultSubpartition</code> 对应下游一个消费者（一个 <code>ResultPartition</code> 中的 <code>ResultSubpartition</code> 数量 &#x3D; 下游消费者数量），数据写入时，根据分区策略（如 Hash、Round-Robin）决定写入哪个 <code>ResultSubpartition</code>。下游算子的每个并行子任务有一个 <code>SingleInputGate</code>，其中包含多个 <code>InputChannel</code>，每个 <code>InputChannel</code> 对应一个上游并行子任务产出的 <code>ResultPartition</code>。流处理模式下，一个 <code>InputChannel</code> 消费一个 <code>ResultSubpartition</code>，是一对一关系，批处理模式下，一个 <code>InputChannel</code> 可以消费多个 <code>ResultSubpartition</code>（通过 <code>ResultSubpartitionIndexSet</code> 指定一个范围），是一对多关系。</p>
+</blockquote>
+<img    
+                       lazyload
+                       alt="image"
+                       data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260720002859343.png"
+                         style="zoom:45%;" 
+                 >
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * Feed a &#123;<span class="doctag">@link</span> Watermark&#125; into the valve. If the input triggers the valve to output a new</span></span><br><span class="line"><span class="comment"> * Watermark, &#123;<span class="doctag">@link</span> DataOutput#emitWatermark(Watermark)&#125; will be called to process the new</span></span><br><span class="line"><span class="comment"> * Watermark.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> watermark the watermark to feed to the valve</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> channelIndex the index of the channel that the fed watermark belongs to (index</span></span><br><span class="line"><span class="comment"> *     starting from 0)</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@param</span> output 决定可以向下游传播时，通过它实现</span></span><br><span class="line"><span class="comment"> * 当前类的实例在 &#123;<span class="doctag">@link</span> org.apache.flink.streaming.runtime.io.AbstractStreamTaskNetworkInput&#125; 中被</span></span><br><span class="line"><span class="comment"> * 调用，当输入通道接收到 Watermark 时，调用 &#123;<span class="doctag">@link</span> #inputWatermark(Watermark, int, DataOutput)&#125; 将</span></span><br><span class="line"><span class="comment"> * Watermark 输入到阀门中。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">inputWatermark</span><span class="params">(Watermark watermark, <span class="type">int</span> channelIndex, DataOutput&lt;?&gt; output)</span></span><br><span class="line">        <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="comment">// ignore the input watermark if its input channel, or all input channels are idle (i.e.</span></span><br><span class="line">    <span class="comment">// overall the valve is idle).</span></span><br><span class="line">    <span class="keyword">if</span> (lastOutputWatermarkStatus.isActive()</span><br><span class="line">            &amp;&amp; channelStatuses[channelIndex].watermarkStatus.isActive()) &#123;</span><br><span class="line">        <span class="type">long</span> <span class="variable">watermarkMillis</span> <span class="operator">=</span> watermark.getTimestamp();</span><br><span class="line"></span><br><span class="line">        <span class="comment">// if the input watermark&#x27;s value is less than the last received watermark for its input</span></span><br><span class="line">        <span class="comment">// channel, ignore it also.</span></span><br><span class="line">        <span class="keyword">if</span> (watermarkMillis &gt; channelStatuses[channelIndex].watermark) &#123;</span><br><span class="line">            <span class="comment">// 更新通道自身的 Watermark</span></span><br><span class="line">            channelStatuses[channelIndex].watermark = watermarkMillis;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (channelStatuses[channelIndex].isWatermarkAligned) &#123;</span><br><span class="line">                adjustAlignedChannelStatuses(channelStatuses[channelIndex]);</span><br><span class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (watermarkMillis &gt;= lastOutputWatermark) &#123;</span><br><span class="line">                <span class="comment">// previously unaligned input channels are now aligned if its watermark has</span></span><br><span class="line">                <span class="comment">// caught up</span></span><br><span class="line">                markWatermarkAligned(channelStatuses[channelIndex]);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 更新任何 Channel 后，都会获取所有上游最小的 Watermark，如果大于最近发送的 Watermark，</span></span><br><span class="line">            <span class="comment">// 就向下游发送</span></span><br><span class="line">            findAndOutputNewMinWatermarkAcrossAlignedChannels(output);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">findAndOutputNewMinWatermarkAcrossAlignedChannels</span><span class="params">(DataOutput&lt;?&gt; output)</span></span><br><span class="line">        <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="type">boolean</span> <span class="variable">hasAlignedChannels</span> <span class="operator">=</span> !alignedChannelStatuses.isEmpty();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// we acknowledge and output the new overall watermark if it really is aggregated</span></span><br><span class="line">    <span class="comment">// from some remaining aligned channel, and is also larger than the last output watermark</span></span><br><span class="line">    <span class="keyword">if</span> (hasAlignedChannels &amp;&amp; alignedChannelStatuses.peek().watermark &gt; lastOutputWatermark) &#123;</span><br><span class="line">        lastOutputWatermark = alignedChannelStatuses.peek().watermark;</span><br><span class="line">        output.emitWatermark(<span class="keyword">new</span> <span class="title class_">Watermark</span>(lastOutputWatermark));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中调用了 <code>OneInputStreamTask.StreamTaskNetworkOutput</code> 的 <code>emitWatermark</code> 方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">emitWatermark</span><span class="params">(Watermark watermark)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    watermarkGauge.setCurrentWatermark(watermark.getTimestamp());</span><br><span class="line">    operator.processWatermark(watermark);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<img    
+                       lazyload
+                       alt="image"
+                       data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260720002719147.png"
+                         alt="TimerService" style="zoom:42%;" 
+                 >
+
+<p>其中调用了 <code>AbstractStreamOperator</code> 的 <code>processWatermark</code> 方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">processWatermark</span><span class="params">(Watermark mark)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="keyword">if</span> (timeServiceManager != <span class="literal">null</span>) &#123;</span><br><span class="line">        timeServiceManager.advanceWatermark(mark);</span><br><span class="line">    &#125;</span><br><span class="line">    output.emitWatermark(mark);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>算子先推进当前算子的事件时间计时器（Timer），再向下游发送 Watermark，在 <code>InternalTimerServiceImpl.advanceWatermark</code> 方法中，会找出所有时间小于 Watermark 时间的计时器并依次触发。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">advanceWatermark</span><span class="params">(<span class="type">long</span> time)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    currentWatermark = time;</span><br><span class="line"></span><br><span class="line">    InternalTimer&lt;K, N&gt; timer;</span><br><span class="line">    <span class="comment">// 找出所有触发时间 ≤ Watermark 时间的计时器并依次触发</span></span><br><span class="line">    <span class="keyword">while</span> ((timer = eventTimeTimersQueue.peek()) != <span class="literal">null</span></span><br><span class="line">            &amp;&amp; timer.getTimestamp() &lt;= time</span><br><span class="line">            &amp;&amp; !cancellationContext.isCancelled()) &#123;</span><br><span class="line">        keyContext.setCurrentKey(timer.getKey());</span><br><span class="line">        eventTimeTimersQueue.poll();</span><br><span class="line">        triggerTarget.onEventTime(timer);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Timer 的作用是让某段逻辑在 Watermark 推进到指定事件时间时被触发执行，常见包括</p>
+<ol>
+<li>触发窗口计算；</li>
+<li>用户自定义延迟触发逻辑。</li>
+</ol>
+<h3 id="2-5-整体流程"><a href="#2-5-整体流程" class="headerlink" title="2.5 整体流程"></a>2.5 整体流程</h3><p><code>StreamOneInputProcessor.processInput</code> 拉取输入后，<code>AbstractStreamTaskNetworkInput</code> 反序列化出 <code>Watermark</code>，先交给 <code>StatusWatermarkValve</code> 按 Channel 做最小值汇总，只有整体 Watermark 推进时，才通过 <code>StreamTaskNetworkOutput.emitWatermark</code> 调用主算子的 <code>processWatermark</code>，算子收到后推进自己事件时间计时器，触发窗口或用户 Timer，再将 Watermark 传给下游。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>文本总结了 Flink 1.18 的时间语义、Watermark 的定义和作用、生成 Watermark 的过程和 Watermark 的处理过程。</p>
+
+                    
+                </div>
+
+                
+
+                <div class="post-bottom-tags-and-share border-box">
+                    <div>
+                        
+                            <ul class="post-tags-box border-box">
+                                
+                                    <li class="tag-item border-box">
+                                        <i class="icon fas fa-hashtag"></i>&nbsp;<a href="/tags/Flink/">Flink</a>
+                                    </li>
+                                
+                            </ul>
+                        
+                    </div>
+                    <div>
+                        
+                    </div>
+                </div>
+
+                
+
+                
+                    <div class="post-nav border-box">
+                        
+                        
+                            <div class="next-post">
+                                <a class="next"
+                                   rel="next"
+                                   href="/posts/flink-cluster-startup-process-in-k8s-mode/"
+                                   title="Flink 集群启动的流程（K8s Session 模式）"
+                                >
+                                    <span class="title flex-center">
+                                        <span class="post-nav-title-item text-ellipsis">Flink 集群启动的流程（K8s Session 模式）</span>
+                                        <span class="post-nav-item">下一篇</span>
+                                    </span>
+                                    <span class="right arrow-icon flex-center">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </span>
+                                </a>
+                            </div>
+                        
+                    </div>
+                
+
+                
+                    
+
+
+
+
+
+
+                
+            </div>
+        </div>
+
+        
+            <div class="pc-post-toc right-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%97%B6%E9%97%B4%E8%AF%AD%E4%B9%89"><span class="nav-text">一、时间语义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Watermark"><span class="nav-text">二、Watermark</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E5%AE%9A%E4%B9%89"><span class="nav-text">2.1 定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E4%BD%9C%E7%94%A8"><span class="nav-text">2.2 作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-%E7%94%9F%E6%88%90-Watermark"><span class="nav-text">2.3 生成 Watermark</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-Watermark-%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B"><span class="nav-text">2.4 Watermark 处理流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-1-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-text">2.4.1 初始化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-2-%E5%8F%91%E5%87%BA-Watermark"><span class="nav-text">2.4.2 发出 Watermark</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-3-%E4%B8%8B%E6%B8%B8%E5%A4%84%E7%90%86"><span class="nav-text">2.4.3 下游处理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B"><span class="nav-text">2.5 整体流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        
+    </div>
+</div>
+
+
+                
+            </div>
+        </div>
+
+        <div class="page-main-content-bottom border-box">
+            
+<footer class="footer border-box">
+    <div class="copyright-info info-item">
+    &copy;&nbsp;<span>2025</span>&nbsp;-&nbsp;2026
+    
+            &nbsp;<i class="fas fa-heart icon-animate"></i>&nbsp;&nbsp;<a href="/">Shen Huanglin</a>
+        
+    </div>
+
+    <div class="theme-info info-item">
+        由&nbsp;<a target="_blank" href="https://hexo.io">Hexo</a>&nbsp;驱动&nbsp;&&nbsp;主题&nbsp;<a class="keep-version" target="_blank" href="https://github.com/XPoet/hexo-theme-keep">Keep</a>
+    </div>
+
+    
+
+    
+
+    
+</footer>
+
+        </div>
+    </div>
+
+    <!-- post tools -->
+    
+        <div class="post-tools right-toc">
+            <div class="post-tools-container border-box">
+    <ul class="post-tools-list border-box">
+        <!-- PC encrypt again -->
+        
+
+        <!-- PC TOC show toggle -->
+        
+            <li class="tools-item flex-center toggle-show-toc">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        <!-- PC go comment -->
+        
+
+        <!-- PC full screen -->
+        <li class="tools-item flex-center full-screen">
+            <i class="fa-solid fa-expand"></i>
+        </li>
+    </ul>
+</div>
+
+        </div>
+    
+
+    <!-- side tools -->
+    <div class="side-tools">
+        <div class="side-tools-container border-box ">
+    <ul class="side-tools-list side-tools-show-handle border-box">
+        <li class="tools-item tool-font-adjust-plus flex-center">
+            <i class="fas fa-search-plus"></i>
+        </li>
+
+        <li class="tools-item tool-font-adjust-minus flex-center">
+            <i class="fas fa-search-minus"></i>
+        </li>
+
+        <!-- toggle mode -->
+        
+            <li class="tools-item tool-toggle-theme-mode flex-center">
+                <i class="fas fa-moon"></i>
+            </li>
+        
+
+        <!-- rss -->
+        
+
+        <!-- to bottom -->
+        <li class="tools-item tool-scroll-to-bottom flex-center">
+            <i class="fas fa-arrow-down"></i>
+        </li>
+    </ul>
+
+    <ul class="exposed-tools-list border-box">
+        
+            <li class="tools-item toggle-show-toc-tablet flex-center">
+                <i class="fas fa-list"></i>
+            </li>
+        
+
+        
+
+        <li class="tools-item tool-toggle-show flex-center">
+            <i class="fas fa-cog fa-spin"></i>
+        </li>
+
+        <li class="tools-item tool-scroll-to-top flex-center show-arrow">
+            <i class="arrow fas fa-arrow-up"></i>
+            <span class="percent"></span>
+        </li>
+    </ul>
+</div>
+
+    </div>
+
+    <!-- image mask -->
+    <div class="zoom-in-image-mask">
+    <img class="zoom-in-image">
+</div>
+
+
+    <!-- local search -->
+    
+
+    <!-- tablet toc -->
+    
+        <div class="tablet-post-toc-mask">
+            <div class="tablet-post-toc">
+                <div class="post-toc-wrap border-box">
+    <div class="post-toc border-box">
+        <ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E6%97%B6%E9%97%B4%E8%AF%AD%E4%B9%89"><span class="nav-text">一、时间语义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E3%80%81Watermark"><span class="nav-text">二、Watermark</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-%E5%AE%9A%E4%B9%89"><span class="nav-text">2.1 定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-%E4%BD%9C%E7%94%A8"><span class="nav-text">2.2 作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-%E7%94%9F%E6%88%90-Watermark"><span class="nav-text">2.3 生成 Watermark</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-Watermark-%E5%A4%84%E7%90%86%E6%B5%81%E7%A8%8B"><span class="nav-text">2.4 Watermark 处理流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-1-%E5%88%9D%E5%A7%8B%E5%8C%96"><span class="nav-text">2.4.1 初始化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-2-%E5%8F%91%E5%87%BA-Watermark"><span class="nav-text">2.4.2 发出 Watermark</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-4-3-%E4%B8%8B%E6%B8%B8%E5%A4%84%E7%90%86"><span class="nav-text">2.4.3 下游处理</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B"><span class="nav-text">2.5 整体流程</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-text">总结</span></a></li></ol>
+    </div>
+</div>
+
+            </div>
+        </div>
+    
+</main>
+
+
+
+
+
+<!-- common js -->
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/header-shrink.js"></script>
+
+<script src="/js/back2top.js"></script>
+
+<script src="/js/toggle-theme.js"></script>
+
+<script src="/js/code-block.js"></script>
+
+<script src="/js/main.js"></script>
+
+<script src="/js/libs/anime.min.js"></script>
+
+
+<!-- local search -->
+
+
+<!-- lazyload -->
+
+    
+<script src="/js/lazyload.js"></script>
+
+
+
+<div class="">
+    <!-- home page -->
+    
+
+    <!-- post page -->
+    
+        <!-- post-helper -->
+        
+<script src="/js/post/post-helper.js"></script>
+
+
+        <!-- toc -->
+        
+            
+<script src="/js/post/toc.js"></script>
+
+        
+
+        <!-- copyright-info -->
+        
+
+        <!-- share -->
+        
+    
+
+    <!-- categories page -->
+    
+
+    <!-- links page -->
+    
+
+    <!-- photos page -->
+    
+
+    <!-- tools page -->
+    
+</div>
+
+<!-- mermaid -->
+
+
+<!-- pjax -->
+
+
+
+</body>
+</html>
