@@ -191,7 +191,7 @@
             
                 <span class="meta-info-item post-update-date" style="display: none;" >
                     <i class="icon fa-solid fa-file-pen"></i>&nbsp;
-                    <span class="datetime" data-updated="Mon Jul 20 2026 00:39:27 GMT+0800">2026 年 07 月 20 日</span>
+                    <span class="datetime" data-updated="Mon Jul 27 2026 08:48:31 GMT+0800">2026 年 07 月 27 日</span>
                 </span>
             
         
@@ -353,12 +353,12 @@
 <p>其中调用了 <code>OneInputStreamTask.StreamTaskNetworkOutput</code> 的 <code>emitWatermark</code> 方法</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">emitWatermark</span><span class="params">(Watermark watermark)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    watermarkGauge.setCurrentWatermark(watermark.getTimestamp());</span><br><span class="line">    operator.processWatermark(watermark);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<img    
+<div align=center><img    
                        lazyload
                        alt="image"
                        data-src="https://raw.githubusercontent.com/pixel-vaults/images/main/20260720002719147.png"
-                         alt="TimerService" style="zoom:42%;" 
-                 >
+                         style="zoom:40%;" 
+                 ></div>
 
 <p>其中调用了 <code>AbstractStreamOperator</code> 的 <code>processWatermark</code> 方法</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">processWatermark</span><span class="params">(Watermark mark)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">    <span class="keyword">if</span> (timeServiceManager != <span class="literal">null</span>) &#123;</span><br><span class="line">        timeServiceManager.advanceWatermark(mark);</span><br><span class="line">    &#125;</span><br><span class="line">    output.emitWatermark(mark);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
