@@ -1,0 +1,5 @@
+@import url("https://giscus.app/themes/dark_dimmed.css");
+
+.gsc-left-header {
+  display: none !important;
+}
